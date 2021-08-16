@@ -49,6 +49,9 @@ resource csrPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1,2,3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -63,6 +66,9 @@ resource HubBastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1,2,3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -77,6 +83,9 @@ resource Spoke1BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' =
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1,2,3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -91,6 +100,9 @@ resource Spoke2BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' =
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1,2,3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -105,6 +117,9 @@ resource HubVPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1,2,3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -119,6 +134,9 @@ resource Spoke1VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1,2,3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -133,6 +151,9 @@ resource Spoke2VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1,2,3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -148,8 +169,7 @@ resource Hub 'Microsoft.Network/virtualNetworks@2020-11-01' = {
   properties:{
     addressSpace:{
       addressPrefixes:[
-        Hubv4AddressRange
-       
+        Hubv4AddressRange       
       ]
     }
     subnets:[
