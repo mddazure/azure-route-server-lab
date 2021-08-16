@@ -9,7 +9,7 @@ The lab is built in Bicep. It leverages the CSR1000v free-trial Marketplace offe
 
 ![image](images/ars-lab.png)
 
-#Deploy
+# Deploy
 Log in to Azure Cloud Shell at https://shell.azure.com/ and select Bash.
 
 Ensure Azure CLI and extensions are up to date:
@@ -49,7 +49,7 @@ tunnel pre-shared key: `Routeserver2021`
 
 The S2S VPN tunnel between the gateways in Hub and Spoke2 is present and connected. 
 
-#Configure
+# Configure
 The CSR1000v NVA is up but must still be configured.
 
 First obtain the public IP address of Spoke1VPNGW from the portal.
@@ -120,7 +120,7 @@ ip route 10.0.0.0 255.255.255.0 10.0.253.1
 ```
 Type `exit` multiple times, until the prompt shows `en#`.
 
-#Verify
+# Verify
 
 **From the CSR**
 - Type `show ip int brief` and verify the status of interface Tunnel100 shows `up` for both Interface and Line Protocol.
