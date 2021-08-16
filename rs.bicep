@@ -91,6 +91,7 @@ resource Spoke2BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' =
   sku:{
     name: 'Standard'
   }
+
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -105,6 +106,11 @@ resource HubVPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -119,6 +125,11 @@ resource Spoke1VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -133,6 +144,11 @@ resource Spoke2VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -510,8 +526,8 @@ resource HubVPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
     activeActive: false
     gatewayDefaultSite: null
     sku:{
-      name: 'VpnGw1'
-      tier: 'VpnGw1'
+      name: 'VpnGw1AZ'
+      tier: 'VpnGw1AZ'
     }
   }
 }
@@ -547,8 +563,8 @@ resource Spoke1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
     activeActive: false
     gatewayDefaultSite: null
     sku:{
-      name: 'VpnGw1'
-      tier: 'VpnGw1'
+      name: 'VpnGw1AZ'
+      tier: 'VpnGw1AZ'
     }
   }
 }
@@ -584,8 +600,8 @@ resource Spoke2VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
     activeActive: false
     gatewayDefaultSite: null
     sku:{
-      name: 'VpnGw1'
-      tier: 'VpnGw1'
+      name: 'VpnGw1AZ'
+      tier: 'VpnGw1AZ'
     }
   }
 }
