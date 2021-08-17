@@ -104,15 +104,10 @@ resource HubVPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   name: 'HubVPNGWPubIpV41'
   location: location
   sku:{
-    name: 'Standard'
+    name: 'Basic'
   }
-  zones:[
-    '1'
-    '2'
-    '3'
-  ]
   properties:{
-    publicIPAllocationMethod: 'Static' 
+    publicIPAllocationMethod: 'Dynamic' 
     publicIPAddressVersion: 'IPv4'
     publicIPPrefix: {
       id: prefixIpV4.id
@@ -123,15 +118,10 @@ resource Spoke1VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
   name: 'Spoke1VPNGWPubIpV41'
   location: location
   sku:{
-    name: 'Standard'
+    name: 'Basic'
   }
-  zones:[
-    '1'
-    '2'
-    '3'
-  ]
   properties:{
-    publicIPAllocationMethod: 'Static' 
+    publicIPAllocationMethod: 'Dynamic' 
     publicIPAddressVersion: 'IPv4'
     publicIPPrefix: {
       id: prefixIpV4.id
@@ -142,15 +132,10 @@ resource Spoke2VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
   name: 'Spoke2VPNGWPubIpV41'
   location: location
   sku:{
-    name: 'Standard'
+    name: 'Basic'
   }
-  zones:[
-    '1'
-    '2'
-    '3'
-  ]
   properties:{
-    publicIPAllocationMethod: 'Static' 
+    publicIPAllocationMethod: 'Dynamic' 
     publicIPAddressVersion: 'IPv4'
     publicIPPrefix: {
       id: prefixIpV4.id
