@@ -54,6 +54,11 @@ resource csrPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -68,6 +73,11 @@ resource HubBastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -82,6 +92,11 @@ resource Spoke1BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' =
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -96,6 +111,11 @@ resource Spoke2BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' =
   sku:{
     name: 'Standard'
   }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -106,6 +126,25 @@ resource Spoke2BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' =
 }
 resource HubVPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   name: 'HubVPNGWPubIpV41'
+  location: location
+  sku:{
+    name: 'Standard'
+  }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
+  properties:{
+    publicIPAllocationMethod: 'Static' 
+    publicIPAddressVersion: 'IPv4'
+    publicIPPrefix: {
+      id: prefixIpV4.id
+    }
+  }
+}
+resource HubVPNGWPubIpV42 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
+  name: 'HubVPNGWPubIpV42'
   location: location
   sku:{
     name: 'Standard'
@@ -142,8 +181,46 @@ resource Spoke1VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
     }
   }
 }
+resource Spoke1VPNGWPubIpV42 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
+  name: 'Spoke1VPNGWPubIpV42'
+  location: location
+  sku:{
+    name: 'Standard'
+  }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
+  properties:{
+    publicIPAllocationMethod: 'Static' 
+    publicIPAddressVersion: 'IPv4'
+    publicIPPrefix: {
+      id: prefixIpV4.id
+    }
+  }
+}
 resource Spoke2VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   name: 'Spoke2VPNGWPubIpV41'
+  location: location
+  sku:{
+    name: 'Standard'
+  }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
+  properties:{
+    publicIPAllocationMethod: 'Static' 
+    publicIPAddressVersion: 'IPv4'
+    publicIPPrefix: {
+      id: prefixIpV4.id
+    }
+  }
+}
+resource Spoke2VPNGWPubIpV42 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
+  name: 'Spoke2VPNGWPubIpV42'
   location: location
   sku:{
     name: 'Standard'
@@ -518,6 +595,18 @@ resource HubVPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
           }
         }
       }
+      {
+        name: 'ipconfig2'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          subnet: {
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets','Hub','GatewaySubnet')
+            }
+          publicIPAddress: {
+            id: HubVPNGWPubIpV42.id
+            }
+          }
+        }
     ]
     gatewayType: 'Vpn'
     vpnType: 'RouteBased'
@@ -527,7 +616,7 @@ resource HubVPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
       asn: HubGWASN
     }
     enablePrivateIpAddress: false
-    activeActive: false
+    activeActive: true
     gatewayDefaultSite: null
     sku:{
       name: 'VpnGw1AZ'
@@ -555,6 +644,18 @@ resource Spoke1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
           }
         }
       }
+      {
+        name: 'ipconfig2'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          subnet: {
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets','Spoke1','GatewaySubnet')
+            }
+          publicIPAddress: {
+            id: Spoke1VPNGWPubIpV42.id
+            }
+          }
+        }
     ]
     gatewayType: 'Vpn'
     vpnType: 'RouteBased'
@@ -564,7 +665,7 @@ resource Spoke1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
       asn: Spoke1GWASN
     }
     enablePrivateIpAddress: false
-    activeActive: false
+    activeActive: true
     gatewayDefaultSite: null
     sku:{
       name: 'VpnGw1AZ'
@@ -592,6 +693,18 @@ resource Spoke2VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
           }
         }
       }
+      {
+        name: 'ipconfig2'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          subnet: {
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets','Spoke2','GatewaySubnet')
+            }
+          publicIPAddress: {
+            id: Spoke2VPNGWPubIpV42.id
+            }
+          }
+        }
     ]
     gatewayType: 'Vpn'
     vpnType: 'RouteBased'
@@ -601,7 +714,7 @@ resource Spoke2VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
       asn: Spoke2GWASN
     }
     enablePrivateIpAddress: false
-    activeActive: false
+    activeActive: true
     gatewayDefaultSite: null
     sku:{
       name: 'VpnGw1AZ'
@@ -689,6 +802,7 @@ resource connectionS1HubCSR 'Microsoft.Network/connections@2021-02-01' = {
 }
 //outputs
 output Spoke1VPNGWPubIpV41 string = Spoke1VPNGWPubIpV41.properties.ipAddress
+output Spoke1VPNGWPubIpV42 string = Spoke1VPNGWPubIpV42.properties.ipAddress
 output csrPubIpV4 string = csrPubIpV4.properties.ipAddress
 output HubCSRPrivateIPv4 string = HubCSRPrivateIPv4
 output  HubCSRASN int = HubCSRASN

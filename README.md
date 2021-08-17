@@ -30,7 +30,7 @@ Change directory:
 
 Create a Resource Group:
 
-`az group create --name <rg-name> --location <rg-location>`
+`az group create --name ars-lab --location westeurope`
 
 Accept the terms for the CSR1000v Marketplace offer:
 
@@ -38,7 +38,7 @@ Accept the terms for the CSR1000v Marketplace offer:
 
 Deploy the Bicep template:
 
-`az deployment group create --resource-group <rg-name> --template-file rs.bicep`
+`az deployment group create --resource-group ars-lab --template-file rs.bicep`
 
 Verify that all components in the diagram above have been deployed and are healthy. 
 
