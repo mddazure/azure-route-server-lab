@@ -116,7 +116,7 @@ resource HubVPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
     '3'
   ]
   properties:{
-    publicIPAllocationMethod: 'Dynamic' 
+    publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
     publicIPPrefix: {
       id: prefixIpV4.id
@@ -135,7 +135,7 @@ resource Spoke1VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
     '3'
   ]
   properties:{
-    publicIPAllocationMethod: 'Dynamic' 
+    publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
     publicIPPrefix: {
       id: prefixIpV4.id
@@ -154,7 +154,7 @@ resource Spoke2VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
     '3'
   ]
   properties:{
-    publicIPAllocationMethod: 'Dynamic' 
+    publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
     publicIPPrefix: {
       id: prefixIpV4.id
