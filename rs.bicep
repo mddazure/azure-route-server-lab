@@ -511,8 +511,8 @@ resource HubVPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
     activeActive: false
     gatewayDefaultSite: null
     sku:{
-      name: 'VpnGw1AZ'
-      tier: 'VpnGw1AZ'
+      name: 'VpnGw1'
+      tier: 'VpnGw1'
     }
   }
 }
@@ -548,8 +548,8 @@ resource Spoke1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
     activeActive: false
     gatewayDefaultSite: null
     sku:{
-      name: 'VpnGw1AZ'
-      tier: 'VpnGw1AZ'
+      name: 'VpnGw1'
+      tier: 'VpnGw1'
     }
   }
 }
@@ -585,8 +585,8 @@ resource Spoke2VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
     activeActive: false
     gatewayDefaultSite: null
     sku:{
-      name: 'VpnGw1AZ'
-      tier: 'VpnGw1AZ'
+      name: 'VpnGw1'
+      tier: 'VpnGw1'
     }
   }
 }
