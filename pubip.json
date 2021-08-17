@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.3.255.40792",
+      "templateHash": "16285772143172478752"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "westeurope"
+    }
+  },
+  "functions": [],
+  "resources": [
+    {
+      "type": "Microsoft.Network/publicIPPrefixes",
+      "apiVersion": "2020-11-01",
+      "name": "prefixIpV4",
+      "location": "[parameters('location')]",
+      "zones": ["1","2","3"],   
+      "sku": {
+        "name": "Standard",
+        "tier": "Regional"
+      },
+      "properties": {
+        "prefixLength": 28,
+        "publicIPAddressVersion": "IPv4"
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2020-11-01",
+      "name": "csrPubIpV4",
+      "location": "[parameters('location')]",
+      "zones": [
+        "1"
+      ],
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "publicIPAddressVersion": "IPv4",
+        "publicIPPrefix": {
+          "id": "[resourceId('Microsoft.Network/publicIPPrefixes', 'prefixIpV4')]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPPrefixes', 'prefixIpV4')]"
+      ]
+    }
+  ]
+}

@@ -37,6 +37,11 @@ resource prefixIpV4 'Microsoft.Network/publicIPPrefixes@2020-11-01' = {
     name: 'Standard'
     tier: 'Regional'
   }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
   properties: {
     prefixLength: 28
     publicIPAddressVersion: 'IPv4'
@@ -91,7 +96,6 @@ resource Spoke2BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' =
   sku:{
     name: 'Standard'
   }
-
   properties:{
     publicIPAllocationMethod: 'Static' 
     publicIPAddressVersion: 'IPv4'
@@ -104,8 +108,13 @@ resource HubVPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   name: 'HubVPNGWPubIpV41'
   location: location
   sku:{
-    name: 'Basic'
+    name: 'Standard'
   }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Dynamic' 
     publicIPAddressVersion: 'IPv4'
@@ -118,8 +127,13 @@ resource Spoke1VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
   name: 'Spoke1VPNGWPubIpV41'
   location: location
   sku:{
-    name: 'Basic'
+    name: 'Standard'
   }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Dynamic' 
     publicIPAddressVersion: 'IPv4'
@@ -132,8 +146,13 @@ resource Spoke2VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
   name: 'Spoke2VPNGWPubIpV41'
   location: location
   sku:{
-    name: 'Basic'
+    name: 'Standard'
   }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
   properties:{
     publicIPAllocationMethod: 'Dynamic' 
     publicIPAddressVersion: 'IPv4'
