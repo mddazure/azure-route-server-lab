@@ -546,7 +546,7 @@ module csr 'csr.bicep' = {
     subnetId: resourceId('Microsoft.Network/virtualNetworks/subnets','Hub','CSRsubnet')
     pubIpv4Id: csrPubIpV4.id
     privateIPv4: HubCSRPrivateIPv4
-    bootstUri: '${bootst.name}.blob.${environment().suffixes.storage}'
+    bootstUri: bootst.properties.primaryEndpoints.blob
   }
 }
 
