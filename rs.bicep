@@ -22,6 +22,8 @@ param HubCSRPrivateIPv4 string = '10.0.253.4'
 param HubCSRASN int = 64000
 param HubGWASN int = 300
 
+param storagePrefix string = 'bootst'
+
 @secure()
 param tunnelKey string = 'Routeserver2021'
 
@@ -518,8 +520,22 @@ resource rsBgpConn 'Microsoft.Network/virtualHubs/bgpConnections@2021-02-01' = {
     peerIp: HubCSRPrivateIPv4
   }
 }
+//Storage account for boot diagnostics
+resource bootst 'Microsoft.Storage/storageAccounts@2021-04-01' = {
+  name: '${storagePrefix}And${uniqueString(resourceGroup().id)}'
+  location: location
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  resource blob 'blobServices@2021-04-01' = {
+    name: 'default'
+    resource logcont 'containers' = {
+      name: '$logs'
+    }
+  }
+}
 //VMs
-
 module csr 'csr.bicep' = {
   name: 'csr'
   dependsOn:[
@@ -533,6 +549,7 @@ module csr 'csr.bicep' = {
     subnetId: resourceId('Microsoft.Network/virtualNetworks/subnets','Hub','CSRsubnet')
     pubIpv4Id: csrPubIpV4.id
     privateIPv4: HubCSRPrivateIPv4
+    bootstUri: '${bootst.name}And${'/$logs'}'
   }
 }
 module HubVM 'vm.bicep' = {

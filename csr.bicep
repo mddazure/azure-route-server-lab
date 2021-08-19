@@ -6,6 +6,7 @@ param location string
 param subnetId string
 param pubIpv4Id string
 param privateIPv4 string
+param bootstUri string
 
 
 
@@ -83,6 +84,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2020-12-01' = {
       diagnosticsProfile: {
         bootDiagnostics: {
           enabled: true
+          storageUri: bootstUri
         }
       }
       networkProfile: {
