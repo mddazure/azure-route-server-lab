@@ -530,9 +530,6 @@ resource bootst 'Microsoft.Storage/storageAccounts@2021-04-01' = {
   kind: 'StorageV2'
   resource blob 'blobServices@2021-04-01' = {
     name: 'default'
-    resource logcont 'containers' = {
-      name: '$logs'
-    }
   }
 }
 //VMs
@@ -549,9 +546,10 @@ module csr 'csr.bicep' = {
     subnetId: resourceId('Microsoft.Network/virtualNetworks/subnets','Hub','CSRsubnet')
     pubIpv4Id: csrPubIpV4.id
     privateIPv4: HubCSRPrivateIPv4
-    bootstUri: '${bootst.name}/$logs'
+    bootstUri: '${bootst.name}.blob.${environment().suffixes.storage}'
   }
 }
+
 module HubVM 'vm.bicep' = {
   name: 'HubVM'
   dependsOn:[
