@@ -522,7 +522,7 @@ resource rsBgpConn 'Microsoft.Network/virtualHubs/bgpConnections@2021-02-01' = {
 }
 //Storage account for boot diagnostics
 resource bootst 'Microsoft.Storage/storageAccounts@2021-04-01' = {
-  name: '${storagePrefix}And${uniqueString(resourceGroup().id)}'
+  name: '${storagePrefix}${uniqueString(resourceGroup().id)}'
   location: location
   sku: {
     name: 'Standard_LRS'
@@ -549,7 +549,7 @@ module csr 'csr.bicep' = {
     subnetId: resourceId('Microsoft.Network/virtualNetworks/subnets','Hub','CSRsubnet')
     pubIpv4Id: csrPubIpV4.id
     privateIPv4: HubCSRPrivateIPv4
-    bootstUri: '${bootst.name}And${'/$logs'}'
+    bootstUri: '${bootst.name}/$logs'
   }
 }
 module HubVM 'vm.bicep' = {
