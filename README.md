@@ -52,13 +52,13 @@ The S2S VPN tunnel between the gateways in Hub and Spoke2 is present and connect
 # Configure
 The CSR1000v NVA is up but must still be configured.
 
-First obtain the public IP address of Spoke1VPNGW from the portal.
+First obtain the public IP addresses of Branch1VPNGW from the portal. In below configuration replace *Branch1VPNGWPubIpV41* and *Branch1VPNGWPubIpV42* with the first and second public IP addresses of Branch1VPNGW.
 
 Log in to the CSR1000v, preferably via the Serial Console in the portal as this does not rely on network connectivity in the VNET.
 
 Enter Enable mode by typing `en` at the prompt, then enter Configuration mode by typing `conf t`.
 
-Paste in following configuration, replacing *Branch1VPNGWPubIpV41* and *Branch1VPNGWPubIpV42* with the first and second public IP addresses of Branch1VPNGW:
+Paste in below configuration, one block at a time:
 
 ```
 crypto ikev2 proposal azure-proposal-connectionS1HubCSR 
