@@ -58,10 +58,10 @@ Log in to the CSR1000v, preferably via the Serial Console in the portal as this 
 
 Enter Enable mode by typing `en` at the prompt, then enter Configuration mode by typing `conf t`.
 
-Paste in following configuration, replacing *Spoke1VPNGWPubIpV41* with the public IP address of Spoke1VPNGW:
+Paste in following configuration, replacing *Branch1VPNGWPubIpV41* and *Branch1VPNGWPubIpV42* with the first and second public IP addresses of Branch1VPNGW:
 
 ```
-crypto ikev2 proposal azure-proposal-connectionS1HubCSR
+crypto ikev2 proposal azure-proposal-connectionS1HubCSR 
  encryption aes-cbc-256 aes-cbc-128
  integrity sha1 sha256
  group 2
@@ -69,52 +69,71 @@ crypto ikev2 proposal azure-proposal-connectionS1HubCSR
 crypto ikev2 policy azure-policy-connectionS1HubCSR 
  proposal azure-proposal-connectionS1HubCSR
 !
-crypto ikev2 keyring azure-keyring-connectionS1HubCSR
- peer Spoke1VPNGWPubIpV41
-  address Spoke1VPNGWPubIpV41
-  pre-shared-key Routeserver-2021
+crypto ikev2 keyring azure-keyring
+ peer <Branch1VPNGWPubIpV41>
+  address <Branch1VPNGWPubIpV41>
+  pre-shared-key Routeserver2021
+ peer <Branch1VPNGWPubIpV42>
+  address <Branch1VPNGWPubIpV42>
+  pre-shared-key Routeserver2021
 !
-crypto ikev2 profile azure-profile-connectionS1HubCSR
+crypto ikev2 profile azure-profile-connectionB1HubCSR
  match address local interface GigabitEthernet1
- match identity remote address Spoke1VPNGWPubIpV41 255.255.255.255 
+ match identity remote address <Branch1VPNGWPubIpV41> 255.255.255.255 
+ match identity remote address <Branch1VPNGWPubIpV42> 255.255.255.255 
  authentication remote pre-share
  authentication local pre-share
  keyring local azure-keyring
  lifetime 28800
  dpd 10 5 on-demand
-
+!
 crypto ipsec transform-set azure-ipsec-proposal-set esp-aes 256 esp-sha256-hmac 
  mode tunnel
 !
-crypto ipsec profile azure-ipsec
+crypto ipsec profile azure-ipsec-b1
  set security-association lifetime kilobytes 102400000
  set transform-set azure-ipsec-proposal-set 
- set ikev2-profile azure-profile-connectionS1HubCSR
+ set ikev2-profile azure-profile-connectionB1HubCSR
 !
-interface Tunnel100
+interface Tunnel101
  ip address 10.0.100.4 255.255.255.254
  ip tcp adjust-mss 1350
  tunnel source GigabitEthernet1
  tunnel mode ipsec ipv4
- tunnel destination Spoke1VPNGWPubIpV41
- tunnel protection ipsec profile azure-ipsec
+ tunnel destination <Branch1VPNGWPubIpV41>
+ tunnel protection ipsec profile azure-ipsec-b1
+!
+interface Tunnel102
+ ip address 10.0.100.6 255.255.255.254
+ ip tcp adjust-mss 1350
+ tunnel source GigabitEthernet1
+ tunnel mode ipsec ipv4
+ tunnel destination <Branch1VPNGWPubIpV42>
+ tunnel protection ipsec profile azure-ipsec-b1
+!
+interface Loopback11
+ ip address 1.1.1.1 255.255.255.255
 !
 router bgp 64000
  bgp log-neighbor-changes
-! network statement so that directly connected subnet is advertised to Spoke1
+! network statement so that directly connected subnet is advertised to Branch1
  network 10.0.253.0 mask 255.255.255.0
  neighbor 10.0.0.4 remote-as 65515
  neighbor 10.0.0.4 ebgp-multihop 255
  neighbor 10.0.0.5 remote-as 65515
  neighbor 10.0.0.5 ebgp-multihop 255
+ neighbor 10.1.254.4 remote-as 100
+ neighbor 10.1.254.4 ebgp-multihop 255
+ neighbor 10.1.254.4 update-source Loopback11
  neighbor 10.1.254.5 remote-as 100
  neighbor 10.1.254.5 ebgp-multihop 255
- neighbor 10.1.254.5 update-source Tunnel100
+ neighbor 10.1.254.5 update-source Loopback11
 !
 ! default route pointing to CSR subnet default gateway, so that tunnel outside traffic and internet go out LAN port
 ip route 0.0.0.0 0.0.0.0 GigabitEthernet1 10.0.253.1
-! static route for Spoke1 GatewaySubnet pointing to Tunnel100, so that Spoke1GW BGP peer address is reachable
-ip route 10.1.254.0 255.255.255.0 Tunnel100
+! static routes for Branch1 GatewaySubnet pointing to Tunnel101 and Tunnel102, so that Branch1GW BGP peer address is reachable
+ip route 10.1.254.4 255.255.255.255 Tunnel101
+ip route 10.1.254.5 255.255.255.255 Tunnel102
 ! static route to ARS subnet pointing to CSR subnet default gateway, to prevent recursive routing failure for ARS endpoint addresses learned via BGP from ARS
 ip route 10.0.0.0 255.255.255.0 10.0.253.1
 ```

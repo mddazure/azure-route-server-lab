@@ -7,17 +7,17 @@ crypto ikev2 policy azure-policy-connectionS1HubCSR
  proposal azure-proposal-connectionS1HubCSR
 !
 crypto ikev2 keyring azure-keyring
- peer 20.103.128.80
-  address 20.103.128.80
+ peer <Branch1VPNGWPubIpV41>
+  address <Branch1VPNGWPubIpV41>
   pre-shared-key Routeserver2021
- peer 20.103.128.87
-  address 20.103.128.87
+ peer <Branch1VPNGWPubIpV42>
+  address <Branch1VPNGWPubIpV42>
   pre-shared-key Routeserver2021
 !
 crypto ikev2 profile azure-profile-connectionB1HubCSR
  match address local interface GigabitEthernet1
- match identity remote address 20.103.128.80 255.255.255.255 
- match identity remote address 20.103.128.87 255.255.255.255 
+ match identity remote address <Branch1VPNGWPubIpV41> 255.255.255.255 
+ match identity remote address <Branch1VPNGWPubIpV42> 255.255.255.255 
  authentication remote pre-share
  authentication local pre-share
  keyring local azure-keyring
@@ -37,7 +37,7 @@ interface Tunnel101
  ip tcp adjust-mss 1350
  tunnel source GigabitEthernet1
  tunnel mode ipsec ipv4
- tunnel destination 20.103.128.80
+ tunnel destination <Branch1VPNGWPubIpV41>
  tunnel protection ipsec profile azure-ipsec-b1
 !
 interface Tunnel102
@@ -45,7 +45,7 @@ interface Tunnel102
  ip tcp adjust-mss 1350
  tunnel source GigabitEthernet1
  tunnel mode ipsec ipv4
- tunnel destination 20.103.128.87
+ tunnel destination <Branch1VPNGWPubIpV42>
  tunnel protection ipsec profile azure-ipsec-b1
 !
 interface Loopback11

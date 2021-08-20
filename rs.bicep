@@ -812,6 +812,11 @@ resource lngCSR 'Microsoft.Network/localNetworkGateways@2021-02-01' = {
   ]
   properties:{
     gatewayIpAddress: csrPubIpV4.properties.ipAddress
+    localNetworkAddressSpace: {
+      addressPrefixes:[
+        '${HubCSRLoopbackIPv4}/32'
+      ]
+    }
     bgpSettings:{
       asn: HubCSRASN
       bgpPeeringAddress: HubCSRLoopbackIPv4
@@ -879,6 +884,7 @@ resource connectionS1HubCSR 'Microsoft.Network/connections@2021-02-01' = {
     }
     connectionType: 'IPsec'
     sharedKey:tunnelKey
+    enableBgp: true
   }
 }
 //outputs
