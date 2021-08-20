@@ -1,16 +1,19 @@
 param location string = 'westeurope'
 
-param Spoke1v4AddressRange string = '10.1.0.0/16'
-param Spoke1VMSubnetv4AddressRange string = '10.1.0.0/24'
-param Spoke1GatewaySubnetv4AddressRange string = '10.1.254.0/24'
-param Spoke1AzureBastionSubnetv4AddressRange string = '10.1.255.0/24'
-param Spoke1GWASN int = 100
+param Branch1v4AddressRange string = '10.1.0.0/16'
+param Branch1VMSubnetv4AddressRange string = '10.1.0.0/24'
+param Branch1GatewaySubnetv4AddressRange string = '10.1.254.0/24'
+param Branch1AzureBastionSubnetv4AddressRange string = '10.1.255.0/24'
+param Branch1GWASN int = 100
 
-param Spoke2v4AddressRange string = '10.2.0.0/16'
-param Spoke2VMSubnetv4AddressRange string = '10.2.0.0/24'
-param Spoke2GatewaySubnetv4AddressRange string = '10.2.254.0/24'
-param Spoke2AzureBastionSubnetv4AddressRange string = '10.2.255.0/24'
-param Spoke2GWASN int = 200
+param Branch2v4AddressRange string = '10.2.0.0/16'
+param Branch2VMSubnetv4AddressRange string = '10.2.0.0/24'
+param Branch2GatewaySubnetv4AddressRange string = '10.2.254.0/24'
+param Branch2AzureBastionSubnetv4AddressRange string = '10.2.255.0/24'
+param Branch2GWASN int = 200
+
+param Spoke1v4AddressRange string = '10.3.0.0/16'
+param Spoke1VMSubnetv4AddressRange string = '10.3.0.0/24'
 
 param Hubv4AddressRange string = '10.0.0.0/16'
 param HubRouteServerSubnetv4AddressRange string = '10.0.0.0/24'
@@ -18,6 +21,7 @@ param HubVMSubnetv4AddressRange string = '10.0.1.0/24'
 param HubCSRSubnetv4AddressRange string = '10.0.253.0/24'
 param HubGatewaySubnetv4AddressRange string = '10.0.254.0/24'
 param HubsubnetBastionRange string = '10.0.255.0/24'
+param HubCSRLoopbackIPv4 string = '1.1.1.1'
 param HubCSRPrivateIPv4 string = '10.0.253.4'
 param HubCSRASN int = 64000
 param HubGWASN int = 300
@@ -88,8 +92,8 @@ resource HubBastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
     }
   }
 }
-resource Spoke1BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
-  name: 'Spoke1BastionPubIpV4'
+resource Branch1BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
+  name: 'Branch1BastionPubIpV4'
   location: location
   sku:{
     name: 'Standard'
@@ -107,8 +111,8 @@ resource Spoke1BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' =
     }
   }
 }
-resource Spoke2BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
-  name: 'Spoke2BastionPubIpV4'
+resource Branch2BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
+  name: 'Branch2BastionPubIpV4'
   location: location
   sku:{
     name: 'Standard'
@@ -164,8 +168,8 @@ resource HubVPNGWPubIpV42 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
     }
   }
 }
-resource Spoke1VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
-  name: 'Spoke1VPNGWPubIpV41'
+resource Branch1VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
+  name: 'Branch1VPNGWPubIpV41'
   location: location
   sku:{
     name: 'Standard'
@@ -183,8 +187,8 @@ resource Spoke1VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
     }
   }
 }
-resource Spoke1VPNGWPubIpV42 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
-  name: 'Spoke1VPNGWPubIpV42'
+resource Branch1VPNGWPubIpV42 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
+  name: 'Branch1VPNGWPubIpV42'
   location: location
   sku:{
     name: 'Standard'
@@ -202,8 +206,8 @@ resource Spoke1VPNGWPubIpV42 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
     }
   }
 }
-resource Spoke2VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
-  name: 'Spoke2VPNGWPubIpV41'
+resource Branch2VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
+  name: 'Branch2VPNGWPubIpV41'
   location: location
   sku:{
     name: 'Standard'
@@ -221,8 +225,8 @@ resource Spoke2VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = 
     }
   }
 }
-resource Spoke2VPNGWPubIpV42 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
-  name: 'Spoke2VPNGWPubIpV42'
+resource Branch2VPNGWPubIpV42 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
+  name: 'Branch2VPNGWPubIpV42'
   location: location
   sku:{
     name: 'Standard'
@@ -292,13 +296,83 @@ resource Hub 'Microsoft.Network/virtualNetworks@2020-11-01' = {
     ]
   }
 }
+resource Branch1 'Microsoft.Network/virtualNetworks@2020-11-01' = {
+  name: 'Branch1'
+  location: location
+  properties:{
+    addressSpace:{
+      addressPrefixes:[
+        Branch1v4AddressRange
+       
+      ]
+    }
+    subnets:[
+      {
+      name: 'VMSubnet'
+      properties:{
+        addressPrefix: Branch1VMSubnetv4AddressRange
+        networkSecurityGroup: {
+          id: nsg.id
+          }
+        }
+      }
+      {
+        name: 'GatewaySubnet'
+        properties:{
+          addressPrefix: Branch1GatewaySubnetv4AddressRange
+        }
+      } 
+      {
+        name: 'AzureBastionSubnet'
+        properties:{
+          addressPrefix: Branch1AzureBastionSubnetv4AddressRange
+        }
+      } 
+    ]      
+  } 
+}
+resource Branch2 'Microsoft.Network/virtualNetworks@2020-11-01' = {
+  name: 'Branch2'
+  location: location
+  properties:{
+    addressSpace:{
+      addressPrefixes:[
+        Branch2v4AddressRange
+       
+      ]
+    }
+    subnets:[
+      {
+      name: 'VMSubnet'
+      properties:{
+        addressPrefix: Branch2VMSubnetv4AddressRange
+        networkSecurityGroup: {
+          id: nsg.id
+          }
+        }
+      }
+      {
+        name: 'GatewaySubnet'
+        properties:{
+          addressPrefix: Branch2GatewaySubnetv4AddressRange
+        }
+      } 
+      {
+        name: 'AzureBastionSubnet'
+        properties:{
+          addressPrefix: Branch2AzureBastionSubnetv4AddressRange
+        }
+      } 
+    ]      
+  } 
+}
 resource Spoke1 'Microsoft.Network/virtualNetworks@2020-11-01' = {
   name: 'Spoke1'
   location: location
   properties:{
     addressSpace:{
       addressPrefixes:[
-        Spoke1v4AddressRange
+        Branch1v4AddressRange
        
       ]
     }
@@ -310,53 +384,6 @@ resource Spoke1 'Microsoft.Network/virtualNetworks@2020-11-01' = {
         networkSecurityGroup: {
           id: nsg.id
           }
-        }
-      }
-      {
-        name: 'GatewaySubnet'
-        properties:{
-          addressPrefix: Spoke1GatewaySubnetv4AddressRange
-        }
-      } 
-      {
-        name: 'AzureBastionSubnet'
-        properties:{
-          addressPrefix: Spoke1AzureBastionSubnetv4AddressRange
-        }
-      } 
-    ]      
-  } 
-}
-resource Spoke2 'Microsoft.Network/virtualNetworks@2020-11-01' = {
-  name: 'Spoke2'
-  location: location
-  properties:{
-    addressSpace:{
-      addressPrefixes:[
-        Spoke2v4AddressRange
-       
-      ]
-    }
-    subnets:[
-      {
-      name: 'VMSubnet'
-      properties:{
-        addressPrefix: Spoke2VMSubnetv4AddressRange
-        networkSecurityGroup: {
-          id: nsg.id
-          }
-        }
-      }
-      {
-        name: 'GatewaySubnet'
-        properties:{
-          addressPrefix: Spoke2GatewaySubnetv4AddressRange
-        }
-      } 
-      {
-        name: 'AzureBastionSubnet'
-        properties:{
-          addressPrefix: Spoke2AzureBastionSubnetv4AddressRange
         }
       } 
     ]      
@@ -433,10 +460,10 @@ resource hubBastion 'Microsoft.Network/bastionHosts@2020-11-01' = {
     ]
   }
 }
-resource Spoke1Bastion 'Microsoft.Network/bastionHosts@2020-11-01' = {
-  name: 'Spoke1Bastion'
+resource Branch1Bastion 'Microsoft.Network/bastionHosts@2020-11-01' = {
+  name: 'Branch1Bastion'
   dependsOn:[
-    Spoke1
+    Branch1
   ]
   location: location
   properties: {
@@ -445,20 +472,20 @@ resource Spoke1Bastion 'Microsoft.Network/bastionHosts@2020-11-01' = {
         name: 'ipConf'
         properties: {
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets','Spoke1','AzureBastionSubnet')
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets','Branch1','AzureBastionSubnet')
           } 
           publicIPAddress: {
-            id: Spoke1BastionPubIpV4.id
+            id: Branch1BastionPubIpV4.id
           }
         }
       }
     ]
   }
 }
-resource Spoke2Bastion 'Microsoft.Network/bastionHosts@2020-11-01' = {
-  name: 'Spoke2Bastion'
+resource Branch2Bastion 'Microsoft.Network/bastionHosts@2020-11-01' = {
+  name: 'Branch2Bastion'
   dependsOn:[
-    Spoke2
+    Branch2
   ]
   location: location
   properties: {
@@ -467,10 +494,10 @@ resource Spoke2Bastion 'Microsoft.Network/bastionHosts@2020-11-01' = {
         name: 'ipConf'
         properties: {
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets','Spoke2','AzureBastionSubnet')
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets','Branch2','AzureBastionSubnet')
           } 
           publicIPAddress: {
-            id: Spoke2BastionPubIpV4.id
+            id: Branch2BastionPubIpV4.id
           }
         }
       }
@@ -478,15 +505,38 @@ resource Spoke2Bastion 'Microsoft.Network/bastionHosts@2020-11-01' = {
   }
 }
 //PEERINGS
-/*resource spoke1hub 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2020-08-01' = {
+resource spoke1hub 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2020-08-01' = {
   name: 'spoke1-hub'
+  dependsOn:[
+    Hub
+    Spoke1
+  ]
   parent: Spoke1
   properties:{
     remoteVirtualNetwork:{
       id:Hub.id
     }
+    allowForwardedTraffic: true
+    allowVirtualNetworkAccess: true
+    useRemoteGateways: true
   }
-}*/
+}
+resource hubspoke1 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2020-08-01' = {
+  name: 'hub-spoke1'
+  dependsOn:[
+    Hub
+    Spoke1
+  ]
+  parent: Hub
+  properties:{
+    remoteVirtualNetwork:{
+      id:Spoke1.id
+    }
+    allowForwardedTraffic: true
+    allowVirtualNetworkAccess: true
+    allowGatewayTransit: true
+  }
+}
 //RouteServer
 resource RouteServer 'Microsoft.Network/virtualHubs@2021-02-01' = {
   name: 'RouteServer'
@@ -496,6 +546,7 @@ resource RouteServer 'Microsoft.Network/virtualHubs@2021-02-01' = {
   location: location
   properties: {
     sku: 'Standard'
+    allowBranchToBranchTraffic: true
   }
 }
 resource rsIpConfig 'Microsoft.Network/virtualHubs/ipConfigurations@2021-02-01' ={
@@ -563,30 +614,43 @@ module HubVM 'vm.bicep' = {
     subnetId: resourceId('Microsoft.Network/virtualNetworks/subnets','Hub','VMSubnet')
   }
 }
+module Branch1VM 'vm.bicep' = {
+  name: 'Branch1VM'
+  dependsOn:[
+    Branch1
+  ]
+  params:{
+    vmName:'Branch1VM'
+    adminPw:adminPassword
+    adminUser:adminUsername
+    location:location
+    subnetId: resourceId('Microsoft.Network/virtualNetworks/subnets','Branch1','VMSubnet')
+  }
+}
+module Branch2VM 'vm.bicep' = {
+  name: 'Branch2VM'
+  dependsOn:[
+    Branch2
+  ]
+  params:{
+    vmName:'Branch2VM'
+    adminPw:adminPassword
+    adminUser:adminUsername
+    location:location
+    subnetId: resourceId('Microsoft.Network/virtualNetworks/subnets','Branch2','VMSubnet')
+  }
+}
 module Spoke1VM 'vm.bicep' = {
   name: 'Spoke1VM'
   dependsOn:[
-    Spoke1
+    Branch1
   ]
   params:{
-    vmName:'Spoke1VM'
+    vmName:'Branch1VM'
     adminPw:adminPassword
     adminUser:adminUsername
     location:location
     subnetId: resourceId('Microsoft.Network/virtualNetworks/subnets','Spoke1','VMSubnet')
-  }
-}
-module Spoke2VM 'vm.bicep' = {
-  name: 'Spoke2VM'
-  dependsOn:[
-    Spoke1
-  ]
-  params:{
-    vmName:'Spoke2VM'
-    adminPw:adminPassword
-    adminUser:adminUsername
-    location:location
-    subnetId: resourceId('Microsoft.Network/virtualNetworks/subnets','Spoke2','VMSubnet')
   }
 }
 //VPN Gateways
@@ -639,11 +703,11 @@ resource HubVPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
     }
   }
 }
-resource Spoke1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
-  name: 'Spoke1VPNGW'
+resource Branch1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
+  name: 'Branch1VPNGW'
   location: location
   dependsOn:[
-    Spoke1
+    Branch1
   ]
   properties:{
     ipConfigurations: [
@@ -652,10 +716,10 @@ resource Spoke1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
       properties: {
         privateIPAllocationMethod: 'Dynamic'
         subnet: {
-          id: resourceId('Microsoft.Network/virtualNetworks/subnets','Spoke1','GatewaySubnet')
+          id: resourceId('Microsoft.Network/virtualNetworks/subnets','Branch1','GatewaySubnet')
           }
         publicIPAddress: {
-          id: Spoke1VPNGWPubIpV41.id
+          id: Branch1VPNGWPubIpV41.id
           }
         }
       }
@@ -664,10 +728,10 @@ resource Spoke1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets','Spoke1','GatewaySubnet')
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets','Branch1','GatewaySubnet')
             }
           publicIPAddress: {
-            id: Spoke1VPNGWPubIpV42.id
+            id: Branch1VPNGWPubIpV42.id
             }
           }
         }
@@ -677,7 +741,7 @@ resource Spoke1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
     vpnGatewayGeneration: 'Generation1'
     enableBgp: true
     bgpSettings:{
-      asn: Spoke1GWASN
+      asn: Branch1GWASN
     }
     enablePrivateIpAddress: false
     activeActive: true
@@ -688,11 +752,11 @@ resource Spoke1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
     }
   }
 }
-resource Spoke2VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
-  name: 'Spoke2VPNGW'
+resource Branch2VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
+  name: 'Branch2VPNGW'
   location: location
   dependsOn:[
-    Spoke2
+    Branch2
   ]
   properties:{
     ipConfigurations: [
@@ -701,10 +765,10 @@ resource Spoke2VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
       properties: {
         privateIPAllocationMethod: 'Dynamic'
         subnet: {
-          id: resourceId('Microsoft.Network/virtualNetworks/subnets','Spoke2','GatewaySubnet')
+          id: resourceId('Microsoft.Network/virtualNetworks/subnets','Branch2','GatewaySubnet')
           }
         publicIPAddress: {
-          id: Spoke2VPNGWPubIpV41.id
+          id: Branch2VPNGWPubIpV41.id
           }
         }
       }
@@ -713,10 +777,10 @@ resource Spoke2VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets','Spoke2','GatewaySubnet')
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets','Branch2','GatewaySubnet')
             }
           publicIPAddress: {
-            id: Spoke2VPNGWPubIpV42.id
+            id: Branch2VPNGWPubIpV42.id
             }
           }
         }
@@ -726,7 +790,7 @@ resource Spoke2VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
     vpnGatewayGeneration: 'Generation1'
     enableBgp: true
     bgpSettings:{
-      asn: Spoke2GWASN
+      asn: Branch2GWASN
     }
     enablePrivateIpAddress: false
     activeActive: true
@@ -748,7 +812,7 @@ resource lngCSR 'Microsoft.Network/localNetworkGateways@2021-02-01' = {
     gatewayIpAddress: csrPubIpV4.properties.ipAddress
     bgpSettings:{
       asn: HubCSRASN
-      bgpPeeringAddress: HubCSRPrivateIPv4
+      bgpPeeringAddress: HubCSRLoopbackIPv4
     }
   }
 }
@@ -758,7 +822,7 @@ resource connectionS2HubGW 'Microsoft.Network/connections@2021-02-01' = {
   location: location
   dependsOn:[
     HubVPNGW
-    Spoke2VPNGW
+    Branch2VPNGW
   ]
   properties:{
     virtualNetworkGateway1:{
@@ -767,7 +831,7 @@ resource connectionS2HubGW 'Microsoft.Network/connections@2021-02-01' = {
     }
     virtualNetworkGateway2:{
       properties:{}
-      id:Spoke2VPNGW.id
+      id:Branch2VPNGW.id
     }
     connectionType: 'Vnet2Vnet'
     enableBgp: true
@@ -779,12 +843,12 @@ resource connectionHubS2GW 'Microsoft.Network/connections@2021-02-01' = {
   location: location
   dependsOn:[
     HubVPNGW
-    Spoke2VPNGW
+    Branch2VPNGW
   ]
   properties:{
     virtualNetworkGateway1:{
       properties:{}
-      id:Spoke2VPNGW.id
+      id:Branch2VPNGW.id
     }
     virtualNetworkGateway2:{
       properties:{}
@@ -799,13 +863,13 @@ resource connectionS1HubCSR 'Microsoft.Network/connections@2021-02-01' = {
   name: 'connectionS1HubCSR'
   location: location
   dependsOn: [
-    Spoke1VPNGW
+    Branch1VPNGW
     csr
   ]
   properties:{
     virtualNetworkGateway1:{
       properties:{}
-      id:Spoke1VPNGW.id
+      id:Branch1VPNGW.id
     }
     localNetworkGateway2:{
       properties:{}
@@ -816,11 +880,11 @@ resource connectionS1HubCSR 'Microsoft.Network/connections@2021-02-01' = {
   }
 }
 //outputs
-output Spoke1VPNGWPubIpV41 string = Spoke1VPNGWPubIpV41.properties.ipAddress
-output Spoke1VPNGWPubIpV42 string = Spoke1VPNGWPubIpV42.properties.ipAddress
+output Branch1VPNGWPubIpV41 string = Branch1VPNGWPubIpV41.properties.ipAddress
+output Branch1VPNGWPubIpV42 string = Branch1VPNGWPubIpV42.properties.ipAddress
 output csrPubIpV4 string = csrPubIpV4.properties.ipAddress
 output HubCSRPrivateIPv4 string = HubCSRPrivateIPv4
 output  HubCSRASN int = HubCSRASN
 output  HubGWASN int = HubGWASN
-output  Spoke1GWASN int = Spoke1GWASN
-output  Spoke2GWASN int = Spoke2GWASN
+output  Branch1GWASN int = Branch1GWASN
+output  Branch2GWASN int = Branch2GWASN
