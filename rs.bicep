@@ -372,7 +372,7 @@ resource Spoke1 'Microsoft.Network/virtualNetworks@2020-11-01' = {
   properties:{
     addressSpace:{
       addressPrefixes:[
-        Branch1v4AddressRange
+        Spoke1v4AddressRange
        
       ]
     }
@@ -510,6 +510,7 @@ resource spoke1hub 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@202
   dependsOn:[
     Hub
     Spoke1
+    HubVPNGW
   ]
   parent: Spoke1
   properties:{
@@ -526,6 +527,7 @@ resource hubspoke1 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@202
   dependsOn:[
     Hub
     Spoke1
+    HubVPNGW
   ]
   parent: Hub
   properties:{
@@ -643,10 +645,10 @@ module Branch2VM 'vm.bicep' = {
 module Spoke1VM 'vm.bicep' = {
   name: 'Spoke1VM'
   dependsOn:[
-    Branch1
+    Spoke1
   ]
   params:{
-    vmName:'Branch1VM'
+    vmName:'Spoke1VM'
     adminPw:adminPassword
     adminUser:adminUsername
     location:location
