@@ -29,6 +29,7 @@ resource nicPubIP 'Microsoft.Network/networkInterfaces@2020-08-01' = {
   name: '${vmName}-nic'
   location: location
   properties:{
+    enableIPForwarding: true
     ipConfigurations: [
       {
         name: 'ipv4config0'
