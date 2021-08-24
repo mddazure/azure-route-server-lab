@@ -238,12 +238,18 @@ Observe the iBGP peerings between both instances of the active-active Gateway wi
  ***Learned Routes***
 
  Both instances of the active-active Gateway have a full set of routes. They also learn routes from each other, marked Origin IBgp. These routes are less prefered than those learned via EBgp and are only used when an instance looses the direct path to a destination, for example when a tunnel connection drops.
- If a packet for `10.3.0.4` (Spoke1VM) arrives at an instance, the instance will normally send it out through its tunnel. If the tunnel is no longer present, the instance will had the packet of to the other instance, via the IBgp route. The other instance will then be able to deliver the packet via its tunnel connection.
+
+ If a packet for `10.3.0.4` (Spoke1VM) arrives at an instance, the instance will normally send it out through its tunnel. If the tunnel is no longer present, the instance will send the packet of to the other instance via the IBgp route. The other instance will then be able to deliver the packet via its tunnel connection.
 
 **From Branch1VM**
 
-Navigate to Network interfaces -> Branch1VM-nic. Click Effective routes. The VM has routes for all prefixes outside of the VNET, pointing to both instances of the Gateway. The Azure platform will do Equal Cost Multipath (ECMP) routing, meaning that traffic will be shared over both Gateway instances. Traffic is load shared by flow, a flow is identified by its "5-tuple" consisting of source and destination IP addresses, source and destination ports and protocol (TCP, UDP, ICMP). Packets belonging to the same flow will be sent to the same next hop (Gateway instance). 
-Note that flow symmetry is not guaranteed: the path for return packets of the same flow is determined by the CSR, and these may be sent via the other instance.
+Navigate to Network interfaces -> Branch1VM-nic. Click Effective routes. 
+
+The VM has routes for all prefixes outside of the VNET, pointing to both instances of the Gateway.
+
+The Azure platform will do Equal Cost Multipath (ECMP) routing, meaning that traffic will be shared over both Gateway instances. Traffic is load shared by flow, with flow identified by its "5-tuple" of source and destination IP addresses, source and destination ports and protocol (TCP, UDP, ICMP).
+
+Packets belonging to the same flow will be sent to the same next hop (Gateway instance). Note that flow symmetry is not guaranteed: the path for return packets of the same flow is determined by the CSR, and these may be sent via the other instance.
  
  
 
