@@ -141,10 +141,101 @@ Type `exit` multiple times, until the prompt shows `en#`.
 
 # Verify
 
-**From the CSR**
-- Type `show ip int brief` and verify the status of interface Tunnel100 shows `up` for both Interface and Line Protocol.
-- Ping Spoke1VM from CSR by typing `ping 10.1.0.4`
-- Verify route exchange 
+**From CSR**
+Log on to CSR via Serial Console.
+
+Type `show ip int brief` 
+ - Verify status of interface Tunnel101 and Tunnel102 shows `up` for both Interface and Line Protocol.
+  
+Obtain the BGP table by typing `show ip bgp`. The table returned should be as shown below.
+  - Routes with a Next Hop of `10.0.0.4` and `10.0.0.5` and AS `65515` in the Path are received from Azure Route Server
+  - Note the Path `10.2.0.0/16`, the prefix of Branch 2, has a Path of `65515` (ARS), `300` (HubVPNGW), `200` (Branch2VPNGW)
+```
+BGP table version is 6, local router ID is 1.1.1.1
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+              r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,
+              x best-external, a additional-path, c RIB-compressed,
+              t secondary path, L long-lived-stale,
+Origin codes: i - IGP, e - EGP, ? - incomplete
+RPKI validation codes: V valid, I invalid, N Not found
+
+     Network          Next Hop            Metric LocPrf Weight Path
+ *    10.0.0.0/16      10.0.0.5                               0 65515 i
+ *>                    10.0.0.4                               0 65515 i
+ *>   10.0.253.0/24    0.0.0.0                  0         32768 i
+ *>   10.1.0.0/16      10.1.254.4                             0 100 i
+ *                     10.1.254.5                             0 100 i
+ *    10.2.0.0/16      10.0.0.5                               0 65515 300 200 i
+ *>                    10.0.0.4                               0 65515 300 200 i
+ *    10.3.0.0/16      10.0.0.5                               0 65515 i
+ *>                    10.0.0.4                               0 65515 i
+```
+- Type `show ip route` to obtain the routing table.
+  - The routes preceded by a `B` are sourced from BGP. Note that the routes marked with `>` in the BGP table above have been copied into the routing table. Because the lab is built with active-active gateways and VPN connections and ARS is active-active too, BGP learns two routes for each destination. Only one route is selected and placed in the routing table, as determined by the [BGP Best Path Selection Algorithm](https://www.cisco.com/c/en/us/support/docs/ip/border-gateway-protocol-bgp/13753-25.html).  
+```Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, m - OMP
+       n - NAT, Ni - NAT inside, No - NAT outside, Nd - NAT DIA
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       H - NHRP, G - NHRP registered, g - NHRP registration summary
+       o - ODR, P - periodic downloaded static route, l - LISP
+       a - application route
+       + - replicated route, % - next hop override, p - overrides from PfR
+
+Gateway of last resort is 10.0.253.1 to network 0.0.0.0
+
+S*    0.0.0.0/0 [1/0] via 10.0.253.1, GigabitEthernet1
+                [1/0] via 10.0.253.1
+      1.0.0.0/32 is subnetted, 1 subnets
+C        1.1.1.1 is directly connected, Loopback11
+      10.0.0.0/8 is variably subnetted, 13 subnets, 4 masks
+B        10.0.0.0/16 [20/0] via 10.0.0.4, 00:14:35
+S        10.0.0.0/24 [1/0] via 10.0.253.1
+C        10.0.100.4/31 is directly connected, Tunnel101
+L        10.0.100.4/32 is directly connected, Tunnel101
+C        10.0.100.6/31 is directly connected, Tunnel102
+L        10.0.100.6/32 is directly connected, Tunnel102
+C        10.0.253.0/24 is directly connected, GigabitEthernet1
+L        10.0.253.4/32 is directly connected, GigabitEthernet1
+B        10.1.0.0/16 [20/0] via 10.1.254.4, 00:14:35
+S        10.1.254.4/32 is directly connected, Tunnel101
+S        10.1.254.5/32 is directly connected, Tunnel102
+B        10.2.0.0/16 [20/0] via 10.0.0.4, 00:14:35
+B        10.3.0.0/16 [20/0] via 10.0.0.4, 00:14:35
+      168.63.0.0/32 is subnetted, 1 subnets
+S        168.63.129.16 [254/0] via 10.0.253.1
+      169.254.0.0/32 is subnetted, 1 subnets
+S        169.254.169.254 [254/0] via 10.0.253.1
+```
+- Ping Branch1VM, Branch2VM and Spoke1VM from CSR by typing `ping 10.1.0.4`, `ping 10.2.0.4`, `ping 10.3.0.4`. Verify that the pings succeed.
+
+**From Spoke1VM**
+In the portal, navigate to Network interfaces -> Spoke1VM-nic. Click Effective routes.
+Note the route for `10.1.0.0/16`, the prefix of Branch1, pointing to `10.0.253.4` which is the LAN interface of the CSR Network Virtual Appliance. Traffic from SPoke1VM for Branch1 is directed to the CSR, where it is sent through the tunnel.
+This route was learned by ARS from the CSR via BGP. Then ARS programmed the route in the NIC route table. 
+
+This is the purpose of ARS: without it, the Azure platform would not know that `10.1.0.0/16` is behind the CSR. The only solution is a static route, a User Defined Route attached the subnet - as we have always done it :wink:!
+
+ **From Branch1VPNGW**
+In the portal navigate to Virtual network gateways -> Branch1VPNGW. Under Monitoring, click BGP Peers.
+
+***BGP Peers***
+The peer with address `1.1.1.1` is the CSR. This is the address of the loopback interface on the CSR used to source the BGP sessions. A static route set in the Local Network Gateway tells Branch1VPNGW that this address is on the other side of the tunnel.
+
+Observe the iBGP peerings between both instances of the active-active Gateway with addresses `10.1.254.4` and `10.1.254.5`.
+
+ ***Learned Routes***
+ Both instances of the active-active Gateway have a full set of routes. They also learn routes from each other, marked Origin IBgp. These routes are less prefered than those learned via EBgp and are only used when an instance looses the direct path to a destination, for example when a tunnel connection drops.
+ If a packet for `10.3.0.4` (Spoke1VM) arrives at an instance, the instance will normally send it out through its tunnel. If the tunnel is no longer present, the instance will had the packet of to the other instance, via the IBgp route. The other instance will then be able to deliver the packet via its tunnel connection.
+
+**From Branch1VM**
+Navigate to Network interfaces -> Branch1VM-nic. Click Effective routes. The VM has routes for all prefixes outside of the VNET, pointing to both instances of the Gateway. The Azure platform will do Equal Cost Multipath (ECMP) routing, meaning that traffic will be shared over both Gateway instances. Traffic is load shared by flow, a flow is identified by its "5-tuple" consisting of source and destination IP addresses, source and destination ports and protocol (TCP, UDP, ICMP). Packets belonging to the same flow will be sent to the same next hop (Gateway instance). 
+Note that flow symmetry is not guaranteed: the path for return packets of the same flow is determined by the CSR, and these may be sent via the other instance.
+ 
+ 
+
 
 
 
