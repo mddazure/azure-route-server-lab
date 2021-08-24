@@ -1,11 +1,11 @@
 # **Azure Route Server with Cisco CSR1000v NVA**
 
 # Introduction
-The objective of this lab is to demonstrate and experiment with route exchange between an NVA and the Azure routing plane through Azure Route Server (ARS).
+The objective of this lab is to demonstrate route exchange between an NVA and the Azure routing plane through Azure Route Server (ARS).
 
 The lab consists of a hub VNET containing ARS, a Cisco CSR1000v NVA, a VPN Gateway and a VM. Two Branch VNETs, each containing a VPN Gateway and a VM, have VPN connections to the CSR and the Gateway in the Hub respectively. The VPN connections are BGP-enabled. A Spoke VNET containing a VM is peered to the Hub. 
 
-The lab is built in Bicep, it leverages the CSR1000v free-trial Marketplace offer.
+The lab is built in Bicep and it leverages the CSR1000v free-trial Marketplace offer.
 
 ![image](images/ars-lab.png)
 
