@@ -218,6 +218,7 @@ S        169.254.169.254 [254/0] via 10.0.253.1
 - Ping Branch1VM, Branch2VM and Spoke1VM from CSR by typing `ping 10.1.0.4`, `ping 10.2.0.4`, `ping 10.3.0.4`. Verify that the pings succeed.
 
 **From Spoke1VM**
+
 In the portal, navigate to Network interfaces -> Spoke1VM-nic. Click Effective routes.
 Note the route for `10.1.0.0/16`, the prefix of Branch1, pointing to `10.0.253.4` which is the LAN interface of the CSR Network Virtual Appliance. Traffic from SPoke1VM for Branch1 is directed to the CSR, where it is sent through the tunnel.
 This route was learned by ARS from the CSR via BGP. Then ARS programmed the route in the NIC route table. 
@@ -225,18 +226,22 @@ This route was learned by ARS from the CSR via BGP. Then ARS programmed the rout
 This is the purpose of ARS: without it, the Azure platform would not know that `10.1.0.0/16` is behind the CSR. The only solution is a static route, a User Defined Route attached the subnet - as we have always done it :wink:!
 
  **From Branch1VPNGW**
+
 In the portal navigate to Virtual network gateways -> Branch1VPNGW. Under Monitoring, click BGP Peers.
 
 ***BGP Peers***
+
 The peer with address `1.1.1.1` is the CSR. This is the address of the loopback interface on the CSR used to source the BGP sessions. A static route set in the Local Network Gateway tells Branch1VPNGW that this address is on the other side of the tunnel.
 
 Observe the iBGP peerings between both instances of the active-active Gateway with addresses `10.1.254.4` and `10.1.254.5`.
 
  ***Learned Routes***
+
  Both instances of the active-active Gateway have a full set of routes. They also learn routes from each other, marked Origin IBgp. These routes are less prefered than those learned via EBgp and are only used when an instance looses the direct path to a destination, for example when a tunnel connection drops.
  If a packet for `10.3.0.4` (Spoke1VM) arrives at an instance, the instance will normally send it out through its tunnel. If the tunnel is no longer present, the instance will had the packet of to the other instance, via the IBgp route. The other instance will then be able to deliver the packet via its tunnel connection.
 
 **From Branch1VM**
+
 Navigate to Network interfaces -> Branch1VM-nic. Click Effective routes. The VM has routes for all prefixes outside of the VNET, pointing to both instances of the Gateway. The Azure platform will do Equal Cost Multipath (ECMP) routing, meaning that traffic will be shared over both Gateway instances. Traffic is load shared by flow, a flow is identified by its "5-tuple" consisting of source and destination IP addresses, source and destination ports and protocol (TCP, UDP, ICMP). Packets belonging to the same flow will be sent to the same next hop (Gateway instance). 
 Note that flow symmetry is not guaranteed: the path for return packets of the same flow is determined by the CSR, and these may be sent via the other instance.
  
