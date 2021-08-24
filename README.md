@@ -3,9 +3,9 @@
 # Introduction
 The objective of this lab is to demonstrate and experiment with route exchange between an NVA and the Azure routing plane through Azure Route Server (ARS).
 
-The lab consists of a hub VNET containing ARS, a Cisco CSR1000v NVA a VPN Gateway and a VM, and two spoke VNETs each containing a VPN Gateway and a VM. Spoke 2 has a S2S  VPN connection to the hub Gateway, the Gateway in spoke 1 has a VPN connection to the CSR. The VPN connections are BGP-enabled.
+The lab consists of a hub VNET containing ARS, a Cisco CSR1000v NVA, a VPN Gateway and a VM. Two Branch VNETs, each containing a VPN Gateway and a VM, have VPN connections to the CSR and the Gateway in the Hub respectively. The VPN connections are BGP-enabled. A Spoke VNET containing a VM is peered to the Hub. 
 
-The lab is built in Bicep. It leverages the CSR1000v free-trial Marketplace offer.
+The lab is built in Bicep, it leverages the CSR1000v free-trial Marketplace offer.
 
 ![image](images/ars-lab.png)
 
@@ -52,7 +52,11 @@ The S2S VPN tunnel between the gateways in Hub and Spoke2 is present and connect
 # Configure
 The CSR1000v NVA is up but must still be configured.
 
-First obtain the public IP addresses of Branch1VPNGW from the portal. In below configuration replace *Branch1VPNGWPubIpV41* and *Branch1VPNGWPubIpV42* with the first and second public IP addresses of Branch1VPNGW.
+Obtain both public IP addresses of Branch1VPNGW in Cloud Shell:
+`az network public-ip show -g ars-lab -n Branch1VPNGWPubIpV41 --query 'ipAddress'`
+`az network public-ip show -g ars-lab -n Branch1VPNGWPubIpV42 --query 'ipAddress'`
+
+In below configuration replace *Branch1VPNGWPubIpV41* and *Branch1VPNGWPubIpV42* with the first and second public IP addresses of Branch1VPNGW.
 
 Log in to the CSR1000v, preferably via the Serial Console in the portal as this does not rely on network connectivity in the VNET.
 
@@ -142,7 +146,7 @@ Type `exit` multiple times, until the prompt shows `en#`.
 # Verify
 
 **From CSR**
-Log on to CSR via Serial Console.
+Log in to CSR via Serial Console.
 
 Type `show ip int brief` 
  - Verify status of interface Tunnel101 and Tunnel102 shows `up` for both Interface and Line Protocol.
