@@ -53,7 +53,9 @@ The S2S VPN tunnel between the gateways in Hub and Spoke2 is present and connect
 The CSR1000v NVA is up but must still be configured.
 
 Obtain both public IP addresses of Branch1VPNGW in Cloud Shell:
+
 `az network public-ip show -g ars-lab -n Branch1VPNGWPubIpV41 --query 'ipAddress'`
+
 `az network public-ip show -g ars-lab -n Branch1VPNGWPubIpV42 --query 'ipAddress'`
 
 In below configuration replace *Branch1VPNGWPubIpV41* and *Branch1VPNGWPubIpV42* with the first and second public IP addresses of Branch1VPNGW.
