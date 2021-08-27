@@ -1,39 +1,38 @@
-param location string = 'westeurope'
+param location string
 
-param Branch1v4AddressRange string = '10.1.0.0/16'
-param Branch1VMSubnetv4AddressRange string = '10.1.0.0/24'
-param Branch1GatewaySubnetv4AddressRange string = '10.1.254.0/24'
-param Branch1AzureBastionSubnetv4AddressRange string = '10.1.255.0/24'
-param Branch1GWASN int = 100
+param Branch1v4AddressRange string
+param Branch1VMSubnetv4AddressRange string
+param Branch1GatewaySubnetv4AddressRange string
+param Branch1AzureBastionSubnetv4AddressRange string
+param Branch1GWASN int
 
-param Branch2v4AddressRange string = '10.2.0.0/16'
-param Branch2VMSubnetv4AddressRange string = '10.2.0.0/24'
-param Branch2GatewaySubnetv4AddressRange string = '10.2.254.0/24'
-param Branch2AzureBastionSubnetv4AddressRange string = '10.2.255.0/24'
-param Branch2GWASN int = 200
+param Branch2v4AddressRange string
+param Branch2VMSubnetv4AddressRange string
+param Branch2GatewaySubnetv4AddressRange string
+param Branch2AzureBastionSubnetv4AddressRange string
+param Branch2GWASN int
 
-param Spoke1v4AddressRange string = '10.3.0.0/16'
-param Spoke1VMSubnetv4AddressRange string = '10.3.0.0/24'
+param Spoke1v4AddressRange string
+param Spoke1VMSubnetv4AddressRange string
 
-param Hubv4AddressRange string = '10.0.0.0/16'
-param HubRouteServerSubnetv4AddressRange string = '10.0.0.0/24'
-param HubVMSubnetv4AddressRange string = '10.0.1.0/24'
-param HubCSRSubnetv4AddressRange string = '10.0.253.0/24'
-param HubGatewaySubnetv4AddressRange string = '10.0.254.0/24'
-param HubsubnetBastionRange string = '10.0.255.0/24'
-param HubCSRLoopbackIPv4 string = '1.1.1.1'
-param HubCSRPrivateIPv4 string = '10.0.253.4'
-param HubCSRASN int = 64000
-param HubGWASN int = 300
+param Hubv4AddressRange string
+param HubRouteServerSubnetv4AddressRange string
+param HubVMSubnetv4AddressRange string
+param HubCSRSubnetv4AddressRange string
+param HubGatewaySubnetv4AddressRange string
+param HubSubnetBastionRange string
+param HubCSRLoopbackIPv4 string
+param HubCSRPrivateIPv4 string
+param HubCSRASN int
+param HubGWASN int
 
-param storagePrefix string = 'bootst'
+param storagePrefix string
 
-@secure()
-param tunnelKey string = 'Routeserver2021'
+param tunnelKey string 
 
-param adminUsername string = 'AzureAdmin'
-@secure()
-param adminPassword string = 'Routeserver-2021'
+param adminUsername string
+
+param adminPassword string 
 
 //public IP prefixes
 resource prefixIpV4 'Microsoft.Network/publicIPPrefixes@2020-11-01' = {
@@ -280,7 +279,7 @@ resource Hub 'Microsoft.Network/virtualNetworks@2020-11-01' = {
     {
       name: 'AzureBastionSubnet'
       properties:{
-        addressPrefix: HubsubnetBastionRange
+        addressPrefix: HubSubnetBastionRange
       }
     }
     {
