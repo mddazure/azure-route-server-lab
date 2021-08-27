@@ -257,6 +257,7 @@ The peer with address `1.1.1.1` is the CSR. This is the address of the loopback 
 
 :point_right: Observe the peerings between both instances of the active-active Gateway with addresses `10.1.254.4` and `10.1.254.5`.
 Each instance learns routes both via EBgp from CSR via the tunnel, and via IBgp from the other instance. Normally, the EBgp routes are prefered and the IBgp routes will be ingnored. However, if an instance's tunnel drops, the IBGP route serves as the backup to the other instance which will still have an operational tunnel.
+
 If a packet for `10.3.0.4` (Spoke1VM) arrives at an instance, the instance will normally send it out through its tunnel. If the tunnel is no longer present, the instance will send the packet of to the other instance via the IBgp route. The other instance will then be able to deliver the packet via its tunnel connection.
 
 **From Branch1VM**
