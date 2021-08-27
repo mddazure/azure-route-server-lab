@@ -42,8 +42,11 @@ Deploy the Bicep template:
 Verify that all components in the diagram above have been deployed to the resourcegroup `ars-lab` and are healthy. 
 
 Credentials:
+
 username: `AzureAdmin`
+
 password: `Routeserver-2021`
+
 tunnel pre-shared key: `Routeserver2021`
 
 The S2S VPN tunnel between the gateways in Hub and Spoke2 is present and connected. 
@@ -245,9 +248,11 @@ Both instances of the VPN GW have a BGP peering and exchange routes with CSR.
 The peer with address `1.1.1.1` is the CSR. This is the address of the loopback interface on the CSR used to source the BGP sessions. A static route set in the Local Network Gateway tells Branch1VPNGW that this address is on the other side of the tunnel.
 
  ***Learned Routes***
+
  Both instances of the active-active Gateway have a full set of routes. They also learn routes from each other, marked Origin IBgp. These routes are less prefered than those learned via EBgp and are only used when an instance looses the direct path to a destination, for example when a tunnel connection drops.
 
 :point_right: In the entry for `10.2.0.0/16` note the AS Path is 64000 (CSR), 65515 (ASR), 300 (HubVPNGW), 200 (Spoke1VPNGW). CSR learns the route for `10.2.0.0/16` from ASR via BGP; static routing on the CSR is not required. 
+
 :exclamation: Without ASR, the CSR (or any other NVA) would not be able to dynamically learn routes from the Azure platform, and it would have to have static routes configured.
 
 :point_right: Observe the peerings between both instances of the active-active Gateway with addresses `10.1.254.4` and `10.1.254.5`.
