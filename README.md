@@ -1,12 +1,11 @@
 # **Azure Route Server with Cisco CSR1000v NVA**
 
 # Introduction
-The objective of this lab is to demonstrate route exchange between an NVA and the Azure routing plane through [Azure Route Server](https://docs.microsoft.com/en-us/azure/route-server/overview). 
+This lab demonstrates dynamic route exchange via BGP between a Network Virtual Appliance and the Azure routing plane, through [Azure Route Server](https://docs.microsoft.com/en-us/azure/route-server/overview). 
 
-:exclamation: Azure Route Server is in Public Preview and visible in the portal on this 
-[Azure Portal link](https://aka.ms/routeserver).
+:exclamation: Azure Route Server (ARS) is in Public Preview and visible in the portal on this [Azure Portal link](https://aka.ms/routeserver).
 
-The lab consists of a hub VNET containing ARS, a Cisco CSR1000v NVA, a VPN Gateway and a VM. Two Branch VNETs, each containing a VPN Gateway and a VM, have VPN connections to the CSR and the Gateway in the Hub respectively. The VPN connections are BGP-enabled. A Spoke VNET containing a VM is peered to the Hub. 
+The lab consists of a Hub VNET containing ARS, a Cisco CSR1000v NVA, a VPN Gateway and a VM. Two Branch VNETs, each containing a VPN Gateway and a VM, have VPN connections to the CSR and the Gateway in the Hub respectively. The VPN connections are BGP-enabled. A Spoke VNET containing a VM is peered to the Hub. 
 
 The lab is built in Bicep and it leverages the CSR1000v free-trial Marketplace offer. 
 
@@ -41,6 +40,8 @@ Deploy the Bicep template:
 
 Verify that all components in the diagram above have been deployed to the resourcegroup `ars-lab` and are healthy. 
 
+The S2S VPN tunnel between the VPN Gateways in Hub and Spoke2 is present and already connected. 
+
 Credentials:
 
 username: `AzureAdmin`
@@ -49,10 +50,10 @@ password: `Routeserver-2021`
 
 tunnel pre-shared key: `Routeserver2021`
 
-The S2S VPN tunnel between the gateways in Hub and Spoke2 is present and connected. 
-
 # Configure
-The CSR1000v NVA is up but must still be configured.
+The BGP peering between ARS and the VPN Gateway in the Hub is controlled by the Branch-to-branch switch, in the portal this is under RouteServer - Configuration. The lab deploys ARS with this switch enabled and no further configuration is needed.
+
+The CSR1000v NVA is up but it must still be configured.
 
 Obtain both public IP addresses of Branch1VPNGW in Cloud Shell:
 
@@ -60,7 +61,7 @@ Obtain both public IP addresses of Branch1VPNGW in Cloud Shell:
 
 `az network public-ip show -g ars-lab -n Branch1VPNGWPubIpV42 --query 'ipAddress'`
 
-In below configuration replace *Branch1VPNGWPubIpV41* and *Branch1VPNGWPubIpV42* with the first and second public IP addresses of Branch1VPNGW.
+In below configuration, replace *Branch1VPNGWPubIpV41* and *Branch1VPNGWPubIpV42* with the first and second public IP addresses of Branch1VPNGW.
 
 Log in to the CSR1000v, preferably via the Serial Console in the portal as this does not rely on network connectivity in the VNET.
 
@@ -78,17 +79,17 @@ crypto ikev2 policy azure-policy-connectionS1HubCSR
  proposal azure-proposal-connectionS1HubCSR
 !
 crypto ikev2 keyring azure-keyring
- peer <Branch1VPNGWPubIpV41>
-  address <Branch1VPNGWPubIpV41>
+ peer Branch1VPNGWPubIpV41
+  address Branch1VPNGWPubIpV41
   pre-shared-key Routeserver2021
- peer <Branch1VPNGWPubIpV42>
-  address <Branch1VPNGWPubIpV42>
+ peer Branch1VPNGWPubIpV42
+  address Branch1VPNGWPubIpV42
   pre-shared-key Routeserver2021
 !
 crypto ikev2 profile azure-profile-connectionB1HubCSR
  match address local interface GigabitEthernet1
- match identity remote address <Branch1VPNGWPubIpV41> 255.255.255.255 
- match identity remote address <Branch1VPNGWPubIpV42> 255.255.255.255 
+ match identity remote address Branch1VPNGWPubIpV41 255.255.255.255 
+ match identity remote address Branch1VPNGWPubIpV42 255.255.255.255 
  authentication remote pre-share
  authentication local pre-share
  keyring local azure-keyring
@@ -108,7 +109,7 @@ interface Tunnel101
  ip tcp adjust-mss 1350
  tunnel source GigabitEthernet1
  tunnel mode ipsec ipv4
- tunnel destination <Branch1VPNGWPubIpV41>
+ tunnel destination Branch1VPNGWPubIpV41
  tunnel protection ipsec profile azure-ipsec-b1
 !
 interface Tunnel102
@@ -116,7 +117,7 @@ interface Tunnel102
  ip tcp adjust-mss 1350
  tunnel source GigabitEthernet1
  tunnel mode ipsec ipv4
- tunnel destination <Branch1VPNGWPubIpV42>
+ tunnel destination Branch1VPNGWPubIpV42
  tunnel protection ipsec profile azure-ipsec-b1
 !
 interface Loopback11
@@ -145,7 +146,7 @@ ip route 10.1.254.5 255.255.255.255 Tunnel102
 ! static route to ARS subnet pointing to CSR subnet default gateway, to prevent recursive routing failure for ARS endpoint addresses learned via BGP from ARS
 ip route 10.0.0.0 255.255.255.0 10.0.253.1
 ```
-Type `exit` multiple times, until the prompt shows `en#`.
+Type `exit` multiple times, until the prompt shows `csr#`.
 
 # Observe
 
@@ -153,14 +154,16 @@ Type `exit` multiple times, until the prompt shows `en#`.
 
 Log in to CSR via Serial Console.
 
-Type `show ip int brief` 
+Type `show ip int brief` .
+
  :thumbsup: Verify status of interfaces Tunnel101 and Tunnel102 shows `up` for both Interface and Line Protocol.
   
 Obtain the BGP table by typing `show ip bgp`. The table returned should be as shown below.
 
-:point_right: Routes with a Next Hop of `10.0.0.4` and `10.0.0.5` and AS `65515` in the Path are received from Azure Route Server
+:point_right: Routes with a Next Hop of `10.0.0.4` and `10.0.0.5` and AS `65515` in the Path are received from Azure Route Server. Routes with a Next Hop of `10.1.254.4` and `10.1.254.5` and AS `100` are received from Branch1VPNGW via the VPN tunnels. 
 
-:point_right: Note that the entry for `10.2.0.0/16`, the prefix of Branch 2, has a Path of `65515` (ARS), `300` (HubVPNGW), `200` (Branch2VPNGW)
+
+:point_right: Note that the entry for `10.2.0.0/16`, the prefix of Branch 2, has a Path of `65515` (ARS), `300` (HubVPNGW), `200` (Branch2VPNGW).
 ```
 BGP table version is 6, local router ID is 1.1.1.1
 Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
@@ -227,7 +230,42 @@ S        169.254.169.254 [254/0] via 10.0.253.1
 ```
 Ping Branch1VM, Branch2VM and Spoke1VM from CSR by typing `ping 10.1.0.4`, `ping 10.2.0.4`, `ping 10.3.0.4`. Verify that the pings succeed.
 
+**From HubVPNGW**
+
+In the portal navigate to Virtual network gateways -> Branch1VPNGW. Under Monitoring, click BGP Peers.
+
+***BGP Peers***
+
+The VPN Gateway in the Hub has a BGP peering with ARS. This is controlled by the ARS Branch-to-branch switch, turned on during lab deployment.
+
+:point_right: Both instances of the Gateway have EBgp peers with Branch2VPNGW at Asn 200 over the VPN, blue in the table below, and with ARS at Asn 65515, green. Note the IBgp peer between instances at Asn 300, orange, which is the Asn of this Gateway.
+
+![image](images/hubvpngw-bgppeers.png)
+
+ ***Learned Routes***
+
+HubVPNGW learns the route for Branch1, `10.1.0.0/16` green in the route table below, from ARS. Branch1 is behind CRS at `10.0.253.4`, but the interface addresses of ARS, `10.0.0.4` and `10.0.0.5`, are listed as the next hops for `10.1.0.0/16`. 
+
+The table shows entries for one Gateway instance, entries for the other instance are similar. 
+
+![image](images/hubvpngw-learnedroutes.png)
+
+:point_right: ARS is not a router and is not in the data path. HubVPNGW sees ARS's interfaces as the next hops to Branch1 so will send any traffic  for Branch1 out of its LAN interface, onto the GatewaySubnet. ARS has programmed a route for Branch1 on the GatewaySubnet (on the host running the Gateway instance really), pointing to CSR at `10.0.253.4`. This sends traffic leaving HubVPNGW for Branch1 directly to CSR. 
+
+![image](images/packetflow.png)
+
+This is similar to how ARS programs Spoke1VM with the route for Branch1 pointing to CRS, described below, which can be observed through Effective Routes on the VM NIC. Unfortunately, Effective Routes for Gateway instances cannot be inspected.
+
+
+The route table also contains the routes for Branch2, blue, learned from Branch2VPNGW. The route exchange with the other Gateway instance is in the orange boxes.
+
 **From Spoke1VM**
+
+Log on to Spoke1VM via Bastion.
+
+Open a command prompt and type `curl 10.1.0.4` to connect to Branch1VM. The response should read "Branch1VM". Type `tracert 10.1.0.4`. The first hop reported is `10.0.253.4`, the LAN interface of CSR. Note that Branch1VPNGW, the hop after CSR, does *not* show in the traceroute.
+
+Do the same for Branch2VM at `10.2.0.4`. HubVPNGW and Branch2VPNGW do not show in the tracert output.
 
 In the portal, navigate to Network interfaces -> Spoke1VM-nic. Click Effective routes.
 
@@ -243,7 +281,7 @@ In the portal navigate to Virtual network gateways -> Branch1VPNGW. Under Monito
 
 ***BGP Peers***
 
-Both instances of the VPN GW have a BGP peering and exchange routes with CSR.
+Both instances of the VPN GW have a BGP peering and exchange routes with CSR over the VPN tunnels.
 
 The peer with address `1.1.1.1` is the CSR. This is the address of the loopback interface on the CSR used to source the BGP sessions. A static route set in the Local Network Gateway tells Branch1VPNGW that this address is on the other side of the tunnel.
 
