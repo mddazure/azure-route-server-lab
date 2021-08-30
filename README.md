@@ -37,7 +37,7 @@ Accept the terms for the CSR1000v Marketplace offer:
 
 Deploy the Bicep template:
 
-`az deployment sub create --location westeurope --template-file main.bicep`
+`az deployment sub create --location westeurope --template-file templates/main.bicep`
 
 Verify that all components in the diagram above have been deployed to the resourcegroup `ars-lab` and are healthy. 
 
