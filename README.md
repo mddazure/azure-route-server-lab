@@ -1,7 +1,7 @@
 # **Azure Route Server with Cisco CSR1000v NVA**
 
 # Introduction
-This lab demonstrates dynamic route exchange via BGP between a Network Virtual Appliance and the Azure routing plane, through [Azure Route Server](https://docs.microsoft.com/en-us/azure/route-server/overview). 
+This lab demonstrates one of the use cases of [Azure Route Server](https://docs.microsoft.com/en-us/azure/route-server/overview): dynamic route exchange via BGP between a Network Virtual Appliance and the Azure routing plane. 
 
 :exclamation: Azure Route Server (ARS) is in Public Preview and visible in the portal on this [Azure Portal link](https://aka.ms/routeserver).
 
@@ -51,23 +51,22 @@ password: `Routeserver-2021`
 tunnel pre-shared key: `Routeserver2021`
 
 # Configure
-The BGP peering between ARS and the VPN Gateway in the Hub is controlled by the Branch-to-branch switch, in the portal this is under RouteServer - Configuration. The lab deploys ARS with this switch enabled and no further configuration is needed.
+The BGP peering between ARS and the VPN Gateway in the Hub is controlled by the Branch-to-branch switch; in the portal this is under RouteServer - Configuration. The lab deploys ARS with this switch enabled and no further configuration is needed.
 
-The CSR1000v NVA is up but it must still be configured.
+The CSR1000v NVA is up but it must still be configured:
 
-Obtain both public IP addresses of Branch1VPNGW in Cloud Shell:
+- Obtain both public IP addresses of Branch1VPNGW in Cloud Shell:
 
-`az network public-ip show -g ars-lab -n Branch1VPNGWPubIpV41 --query 'ipAddress'`
+      az network public-ip show -g ars-lab -n Branch1VPNGWPubIpV41 --query 'ipAddress'
+      az network public-ip show -g ars-lab -n Branch1VPNGWPubIpV42 --query 'ipAddress'
 
-`az network public-ip show -g ars-lab -n Branch1VPNGWPubIpV42 --query 'ipAddress'`
+- In below configuration, replace *Branch1VPNGWPubIpV41* and *Branch1VPNGWPubIpV42* with the first and second public IP addresses of Branch1VPNGW.
 
-In below configuration, replace *Branch1VPNGWPubIpV41* and *Branch1VPNGWPubIpV42* with the first and second public IP addresses of Branch1VPNGW.
+- Log in to the CSR1000v, preferably via the Serial console in the portal, as this does not rely on network connectivity in the VNET. Serial console is under Support + troubleshooting the Virual Machine csr blade.
 
-Log in to the CSR1000v, preferably via the Serial Console in the portal as this does not rely on network connectivity in the VNET.
+- Enter Enable mode by typing `en` at the prompt, then enter Configuration mode by typing `conf t`.
 
-Enter Enable mode by typing `en` at the prompt, then enter Configuration mode by typing `conf t`.
-
-Paste in below configuration, one block at a time:
+- Paste in below configuration, one block at a time:
 
 ```
 crypto ikev2 proposal azure-proposal-connectionS1HubCSR 
@@ -146,7 +145,7 @@ ip route 10.1.254.5 255.255.255.255 Tunnel102
 ! static route to ARS subnet pointing to CSR subnet default gateway, to prevent recursive routing failure for ARS endpoint addresses learned via BGP from ARS
 ip route 10.0.0.0 255.255.255.0 10.0.253.1
 ```
-Type `exit` multiple times, until the prompt shows `csr#`.
+- Type `exit` multiple times, until the prompt shows `csr#`.
 
 # Observe
 
