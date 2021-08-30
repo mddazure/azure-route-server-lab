@@ -1,4 +1,4 @@
-param rgName string = 'ars-lab1'
+param rgName string = 'ars-lab'
 
 param location string = 'westeurope'
 
