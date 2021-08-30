@@ -1,13 +1,17 @@
 # **Azure Route Server with Cisco CSR1000v NVA**
 
 # Introduction
-This lab demonstrates one of the use cases of [Azure Route Server](https://docs.microsoft.com/en-us/azure/route-server/overview): dynamic route exchange via BGP between a Network Virtual Appliance and the Azure routing plane. 
+This lab demonstrates one of the use cases of [Azure Route Server](https://docs.microsoft.com/en-us/azure/route-server/overview): BGP route exchange with a Network Virtual Appliance and a VPN Gateway.
 
-:exclamation: Azure Route Server (ARS) is in Public Preview and visible in the portal on this [Azure Portal link](https://aka.ms/routeserver).
+:exclamation: Azure Route Server (ARS) is in Public Preview and is only visible in the portal on this [Azure Portal link](https://aka.ms/routeserver).
 
-The lab consists of a Hub VNET containing ARS, a Cisco CSR1000v NVA, a VPN Gateway and a VM. Two Branch VNETs, each containing a VPN Gateway and a VM, have VPN connections to the CSR and the Gateway in the Hub respectively. The VPN connections are BGP-enabled. A Spoke VNET containing a VM is peered to the Hub. 
+The lab consists of:
+- A Hub VNET containing ARS, a Cisco CSR1000v NVA, a VPN Gateway and a VM
+- Branch VNETs, each containing a VPN Gateway and a VM
+- BGP-enabled VPN connections from the Branches to the CSR and the Hub Gateway respectively
+- A Spoke VNET containing a VM, peered to the Hub. 
 
-The lab is built in Bicep and it leverages the CSR1000v free-trial Marketplace offer. 
+The lab is built in Bicep and leverages the CSR1000v free-trial Marketplace offer. 
 
 ![image](images/ars-lab.png)
 
@@ -16,27 +20,27 @@ Log in to Azure Cloud Shell at https://shell.azure.com/ and select Bash.
 
 Ensure Azure CLI and extensions are up to date:
   
-`az upgrade --yes`
+      az upgrade --yes
   
 If necessary select your target subscription:
   
-`az account set --subscription <Name or ID of subscription>`
+      az account set --subscription <Name or ID of subscription>
   
 Clone the  GitHub repository:
   
-`git clone https://github.com/mddazure/azure-route-server-lab`
+      git clone https://github.com/mddazure/azure-route-server-lab
   
 Change directory:
   
-`cd ./azure-route-server-lab`
+      cd ./azure-route-server-lab
 
 Accept the terms for the CSR1000v Marketplace offer:
 
-`az vm image terms accept --urn cisco:cisco-csr-1000v:16_12_5-byol:latest`
+      az vm image terms accept --urn cisco:cisco-csr-1000v:16_12_5-byol:latest
 
 Deploy the Bicep template:
 
-`az deployment sub create --location westeurope --template-file templates/main.bicep`
+      az deployment sub create --location westeurope --template-file templates/main.bicep
 
 Verify that all components in the diagram above have been deployed to the resourcegroup `ars-lab` and are healthy. 
 
@@ -53,6 +57,8 @@ tunnel pre-shared key: `Routeserver2021`
 # Configure
 The BGP peering between ARS and the VPN Gateway in the Hub is controlled by the Branch-to-branch switch; in the portal this is under RouteServer - Configuration. The lab deploys ARS with this switch enabled and no further configuration is needed.
 
+![image](images/rs-b2b.png)
+
 The CSR1000v NVA is up but it must still be configured:
 
 - Obtain both public IP addresses of Branch1VPNGW in Cloud Shell:
@@ -62,7 +68,8 @@ The CSR1000v NVA is up but it must still be configured:
 
 - In below configuration, replace *Branch1VPNGWPubIpV41* and *Branch1VPNGWPubIpV42* with the first and second public IP addresses of Branch1VPNGW.
 
-- Log in to the CSR1000v, preferably via the Serial console in the portal, as this does not rely on network connectivity in the VNET. Serial console is under Support + troubleshooting the Virual Machine csr blade.
+- Log in to the CSR1000v, preferably via the Serial console in the portal as this does not rely on network connectivity in the VNET. 
+  - Serial console is under Support + troubleshooting in the Virtual Machine blade.
 
 - Enter Enable mode by typing `en` at the prompt, then enter Configuration mode by typing `conf t`.
 
@@ -149,6 +156,38 @@ ip route 10.0.0.0 255.255.255.0 10.0.253.1
 
 # Observe
 
+**From HubVPNGW**
+
+In the portal, navigate to Virtual network gateways -> Branch1VPNGW. Under Monitoring, click BGP Peers.
+
+***BGP Peers***
+
+The VPN Gateway in the Hub has a BGP peering with ARS. This is controlled by the ARS Branch-to-branch switch turned on during lab deployment.
+
+:point_right: Both instances of the Gateway have EBgp peers with Branch2VPNGW at Asn 200 over the VPN, blue in the table below, and with ARS at Asn 65515, green. 
+
+Note the IBgp peer between instances at Asn 300, orange, which is the Asn of this Gateway.
+
+![image](images/hubvpngw-bgppeers.png)
+
+ ***Learned Routes***
+
+HubVPNGW learns the routes for Branch2, blue in the route table below, from Branch2VPNGW. The route exchange with the other Gateway instance is in the orange boxes.
+
+The route for Branch1, `10.1.0.0/16` in the green box, is learned from ARS. Branch1 is behind CRS at `10.0.253.4`, but the interface addresses of ARS, `10.0.0.4` and `10.0.0.5`, are listed as the next hops for `10.1.0.0/16`. 
+
+![image](images/hubvpngw-learnedroutes.png)
+The table shows entries for one Gateway instance, entries for the other instance are similar.
+
+:point_right: ARS is not a router and is not in the data path. HubVPNGW sees ARS's interfaces as the next hops to Branch1 so will send any traffic  for Branch1 out of its LAN interface, onto the GatewaySubnet. ARS has programmed a route for Branch1 on the GatewaySubnet (on the host running the Gateway instance really), pointing to CSR at `10.0.253.4`. This sends traffic leaving HubVPNGW for Branch1 directly to CSR. 
+
+![image](images/packetflow.png)
+
+This is similar to how ARS programs Spoke1VM with the route for Branch1 pointing to CRS, described below, which can be observed through Effective Routes on the VM NIC. Unfortunately, Effective Routes for Gateway instances cannot be inspected.
+
+:point_right: Both instances of the active-active Gateway have a full set of routes. They also learn routes from each other, marked Origin IBgp. These routes are less prefered than those learned via EBgp and are only used when an instance looses the direct path to a destination, for example when a tunnel connection drops.
+
+
 **From CSR**
 
 Log in to CSR via Serial Console.
@@ -229,34 +268,6 @@ S        169.254.169.254 [254/0] via 10.0.253.1
 ```
 Ping Branch1VM, Branch2VM and Spoke1VM from CSR by typing `ping 10.1.0.4`, `ping 10.2.0.4`, `ping 10.3.0.4`. Verify that the pings succeed.
 
-**From HubVPNGW**
-
-In the portal navigate to Virtual network gateways -> Branch1VPNGW. Under Monitoring, click BGP Peers.
-
-***BGP Peers***
-
-The VPN Gateway in the Hub has a BGP peering with ARS. This is controlled by the ARS Branch-to-branch switch, turned on during lab deployment.
-
-:point_right: Both instances of the Gateway have EBgp peers with Branch2VPNGW at Asn 200 over the VPN, blue in the table below, and with ARS at Asn 65515, green. Note the IBgp peer between instances at Asn 300, orange, which is the Asn of this Gateway.
-
-![image](images/hubvpngw-bgppeers.png)
-
- ***Learned Routes***
-
-HubVPNGW learns the route for Branch1, `10.1.0.0/16` green in the route table below, from ARS. Branch1 is behind CRS at `10.0.253.4`, but the interface addresses of ARS, `10.0.0.4` and `10.0.0.5`, are listed as the next hops for `10.1.0.0/16`. 
-
-The table shows entries for one Gateway instance, entries for the other instance are similar. 
-
-![image](images/hubvpngw-learnedroutes.png)
-
-:point_right: ARS is not a router and is not in the data path. HubVPNGW sees ARS's interfaces as the next hops to Branch1 so will send any traffic  for Branch1 out of its LAN interface, onto the GatewaySubnet. ARS has programmed a route for Branch1 on the GatewaySubnet (on the host running the Gateway instance really), pointing to CSR at `10.0.253.4`. This sends traffic leaving HubVPNGW for Branch1 directly to CSR. 
-
-![image](images/packetflow.png)
-
-This is similar to how ARS programs Spoke1VM with the route for Branch1 pointing to CRS, described below, which can be observed through Effective Routes on the VM NIC. Unfortunately, Effective Routes for Gateway instances cannot be inspected.
-
-
-The route table also contains the routes for Branch2, blue, learned from Branch2VPNGW. The route exchange with the other Gateway instance is in the orange boxes.
 
 **From Spoke1VM**
 
@@ -282,11 +293,14 @@ In the portal navigate to Virtual network gateways -> Branch1VPNGW. Under Monito
 
 Both instances of the VPN GW have a BGP peering and exchange routes with CSR over the VPN tunnels.
 
+![image](images/branch1vpngw-bgppeers.png)
+
 The peer with address `1.1.1.1` is the CSR. This is the address of the loopback interface on the CSR used to source the BGP sessions. A static route set in the Local Network Gateway tells Branch1VPNGW that this address is on the other side of the tunnel.
 
  ***Learned Routes***
+Branch1VPNGW learns the routes for Hub and Branch2 prefixes from CSR, and CSR's AS of 64000 is in the path of these routes.
 
- Both instances of the active-active Gateway have a full set of routes. They also learn routes from each other, marked Origin IBgp. These routes are less prefered than those learned via EBgp and are only used when an instance looses the direct path to a destination, for example when a tunnel connection drops.
+![image](images/branch1vpngw-learnedroutes.png)
 
 :point_right: In the entry for `10.2.0.0/16` note the AS Path is 64000 (CSR), 65515 (ASR), 300 (HubVPNGW), 200 (Spoke1VPNGW). CSR learns the route for `10.2.0.0/16` from ASR via BGP; static routing on the CSR is not required. 
 
@@ -301,7 +315,10 @@ If a packet for `10.3.0.4` (Spoke1VM) arrives at an instance, the instance will 
 
 Navigate to Network interfaces -> Branch1VM-nic. Click Effective routes. 
 
+
+
 The VM has routes for all prefixes outside of the VNET, pointing to both instances of the Gateway.
+![image](images/branch1vm-effectiveroutes.png)
 
 :point_right: The Azure platform will do Equal Cost Multipath (ECMP) routing, meaning that traffic will be shared over both Gateway instances. Traffic is load shared by flow, with a flow identified by its "5-tuple" of source and destination IP addresses, source and destination ports and protocol (TCP, UDP, ICMP).
 
