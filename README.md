@@ -147,20 +147,20 @@ ip route 10.0.0.0 255.255.255.0 10.0.253.1
 ```
 Type `exit` multiple times, until the prompt shows `en#`.
 
-# Verify
+# Observe
 
 **From CSR**
 
 Log in to CSR via Serial Console.
 
 Type `show ip int brief` 
- :thumbsup: Verify status of interface Tunnel101 and Tunnel102 shows `up` for both Interface and Line Protocol.
+ :thumbsup: Verify status of interfaces Tunnel101 and Tunnel102 shows `up` for both Interface and Line Protocol.
   
 Obtain the BGP table by typing `show ip bgp`. The table returned should be as shown below.
 
 :point_right: Routes with a Next Hop of `10.0.0.4` and `10.0.0.5` and AS `65515` in the Path are received from Azure Route Server
 
-:point_right: Note the entry for `10.2.0.0/16`, the prefix of Branch 2, has a Path of `65515` (ARS), `300` (HubVPNGW), `200` (Branch2VPNGW)
+:point_right: Note that the entry for `10.2.0.0/16`, the prefix of Branch 2, has a Path of `65515` (ARS), `300` (HubVPNGW), `200` (Branch2VPNGW)
 ```
 BGP table version is 6, local router ID is 1.1.1.1
 Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
@@ -185,7 +185,7 @@ Type `show ip route` to obtain the routing table.
 
 The routes preceded by a `B` are sourced from BGP. 
 
-:point_right: Note that the routes marked with `>` in the BGP table above have been copied into the routing table. 
+:point_right: Note that only the routes marked with `>`, meaning "best", in the BGP table above have been copied into the routing table. 
 
 Because the lab is built with active-active gateways and VPN connections, and ARS is active-active too, BGP learns two routes for each destination. Only one route is selected and placed in the routing table, as determined by the [BGP Best Path Selection Algorithm](https://www.cisco.com/c/en/us/support/docs/ip/border-gateway-protocol-bgp/13753-25.html).  
 ```Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
@@ -231,11 +231,11 @@ Ping Branch1VM, Branch2VM and Spoke1VM from CSR by typing `ping 10.1.0.4`, `ping
 
 In the portal, navigate to Network interfaces -> Spoke1VM-nic. Click Effective routes.
 
-:point_right: Note that the route for the prefix of Branch1, `10.1.0.0/16`, points to `10.0.253.4`, the LAN interface of the CSR Network Virtual Appliance.
+:point_right: Note that the route for the prefix of Branch1, `10.1.0.0/16`, points to `10.0.253.4`. This is the LAN interface of the CSR Network Virtual Appliance.
 
 Traffic from Spoke1VM for Branch1 is directed to the CSR, where it is sent through the tunnel. This route was learned by ARS from the CSR via BGP. Then ARS programmed the route in the NIC route table. 
 
-:exclamation: This is the purpose of ARS: without it, the Azure platform would not know that `10.1.0.0/16` is behind the CSR. The only solution without ARS is a User Defined Route attached the subnet - as we have always done it :wink:!
+:exclamation: This is the purpose of ARS: without it, the Azure platform would not know that `10.1.0.0/16` is behind the CSR. The only solution without ARS is static routing: manually attached a User Defined Route to the subnet - as we have always done it :wink:!
 
  **From Branch1VPNGW**
 
@@ -268,7 +268,7 @@ The VM has routes for all prefixes outside of the VNET, pointing to both instanc
 
 :point_right: The Azure platform will do Equal Cost Multipath (ECMP) routing, meaning that traffic will be shared over both Gateway instances. Traffic is load shared by flow, with a flow identified by its "5-tuple" of source and destination IP addresses, source and destination ports and protocol (TCP, UDP, ICMP).
 
-Packets belonging to the same flow are sent to the same next hop (Gateway instance). Flow symmetry is not guaranteed: the path for return packets of the same flow is determined by the CSR, it may be send return traffic via the tunnel to the other instance.
+Packets belonging to the same flow are sent to the same next hop (Gateway instance). Flow symmetry is not guaranteed: the path for return packets of the same flow is independently determined by the CSR. Return traffic may be sent via the tunnel to the other Gateway instance.
 
 
 
