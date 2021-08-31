@@ -129,6 +129,14 @@ interface Tunnel102
 interface Loopback11
  ip address 1.1.1.1 255.255.255.255
 !
+! default route pointing to CSR subnet default gateway, so that tunnel outside traffic and internet go out LAN port
+ip route 0.0.0.0 0.0.0.0 GigabitEthernet1 10.0.253.1
+! static routes for Branch1 GatewaySubnet pointing to Tunnel101 and Tunnel102, so that Branch1GW BGP peer address is reachable
+ip route 10.1.254.4 255.255.255.255 Tunnel101
+ip route 10.1.254.5 255.255.255.255 Tunnel102
+! static route to ARS subnet pointing to CSR subnet default gateway, to prevent recursive routing failure for ARS endpoint addresses learned via BGP from ARS
+ip route 10.0.0.0 255.255.255.0 10.0.253.1
+!
 router bgp 64000
  bgp log-neighbor-changes
 ! network statement so that directly connected subnet is advertised to Branch1
@@ -143,14 +151,7 @@ router bgp 64000
  neighbor 10.1.254.5 remote-as 100
  neighbor 10.1.254.5 ebgp-multihop 255
  neighbor 10.1.254.5 update-source Loopback11
-!
-! default route pointing to CSR subnet default gateway, so that tunnel outside traffic and internet go out LAN port
-ip route 0.0.0.0 0.0.0.0 GigabitEthernet1 10.0.253.1
-! static routes for Branch1 GatewaySubnet pointing to Tunnel101 and Tunnel102, so that Branch1GW BGP peer address is reachable
-ip route 10.1.254.4 255.255.255.255 Tunnel101
-ip route 10.1.254.5 255.255.255.255 Tunnel102
-! static route to ARS subnet pointing to CSR subnet default gateway, to prevent recursive routing failure for ARS endpoint addresses learned via BGP from ARS
-ip route 10.0.0.0 255.255.255.0 10.0.253.1
+
 ```
 - Type `exit` multiple times, until the prompt shows `csr#`.
 
