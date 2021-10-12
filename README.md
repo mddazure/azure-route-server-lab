@@ -3,8 +3,6 @@
 # Introduction
 This lab demonstrates one of the use cases of [Azure Route Server](https://docs.microsoft.com/en-us/azure/route-server/overview): BGP route exchange with a Network Virtual Appliance and a VPN Gateway.
 
-:exclamation: Azure Route Server (ARS) is in Public Preview and is only visible in the portal on this [Azure Portal link](https://aka.ms/routeserver).
-
 The lab consists of:
 - A Hub VNET containing ARS, a Cisco CSR1000v NVA, a VPN Gateway and a VM
 - Branch VNETs, each containing a VPN Gateway and a VM
