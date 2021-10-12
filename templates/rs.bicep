@@ -243,6 +243,25 @@ resource Branch2VPNGWPubIpV42 'Microsoft.Network/publicIPAddresses@2020-11-01' =
     }
   }
 }
+resource RouteServerPubIPV4 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
+  name: 'RouteServerPubIPV4'
+  location: location
+  sku:{
+    name: 'Standard'
+  }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
+  properties:{
+    publicIPAllocationMethod: 'Static' 
+    publicIPAddressVersion: 'IPv4'
+    publicIPPrefix: {
+      id: prefixIpV4.id
+    }
+  }
+}
 // VNETs
 resource Hub 'Microsoft.Network/virtualNetworks@2020-11-01' = {
   name: 'Hub'
@@ -543,6 +562,7 @@ resource RouteServer 'Microsoft.Network/virtualHubs@2021-02-01' = {
   name: 'RouteServer'
   dependsOn: [
     HubVPNGW
+    RouteServerPubIPV4
   ]
   location: location
   properties: {
@@ -559,6 +579,9 @@ resource rsIpConfig 'Microsoft.Network/virtualHubs/ipConfigurations@2021-02-01' 
   properties:{
     subnet:{
       id: resourceId('Microsoft.Network/virtualNetworks/subnets','Hub','RouteServerSubnet')
+    }
+    publicIPAddress: {
+      id: resourceId('Microsoft.Network/publicIPAddresses','RouteServerPubIPV4')
     }
   }
 }
