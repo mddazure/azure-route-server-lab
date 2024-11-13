@@ -48,8 +48,8 @@ resource vm 'Microsoft.Compute/virtualMachines@2020-12-01' = {
     storageProfile:  {
       imageReference: {
         publisher: 'cisco'
-        offer: 'cisco-csr-1000v'
-        sku: '16_12_5-byol'
+        offer: 'cisco-c8000v-byol'
+        sku: '17_13_01a-byol'
         version: 'latest'
       }
       osDisk: {
