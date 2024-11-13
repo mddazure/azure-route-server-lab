@@ -37,9 +37,9 @@ resource vm 'Microsoft.Compute/virtualMachines@2020-12-01' = {
   name: vmName
   location: location
   plan:{
-    name: '16_12_5-byol'
+    name: '17_13_01a-byol'
     publisher: 'cisco'
-    product: 'cisco-csr-1000v'
+    product: 'cisco-c8000v-byol'
   }
   properties: {
     hardwareProfile:{
