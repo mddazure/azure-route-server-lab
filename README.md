@@ -1,15 +1,15 @@
-# **Azure Route Server with Cisco CSR1000v NVA**
+# **Azure Route Server with Cisco CSR8000v NVA**
 
 # Introduction
 This lab demonstrates one of the use cases of [Azure Route Server](https://docs.microsoft.com/en-us/azure/route-server/overview): BGP route exchange with a Network Virtual Appliance and a VPN Gateway.
 
 The lab consists of:
-- A Hub VNET containing ARS, a Cisco CSR1000v NVA, a VPN Gateway and a VM
+- A Hub VNET containing ARS, a Cisco CSR8000v NVA, a VPN Gateway and a VM
 - Branch VNETs, each containing a VPN Gateway and a VM
 - BGP-enabled VPN connections from the Branches to the CSR and the Hub Gateway respectively
 - A Spoke VNET containing a VM, peered to the Hub. 
 
-The lab is built in Bicep and leverages the CSR1000v free-trial Marketplace offer. 
+The lab is built in Bicep and leverages the CSR8000v free-trial Marketplace offer. 
 
 ![image](images/ars-lab.png)
 
@@ -32,9 +32,9 @@ Change directory:
   
       cd ./azure-route-server-lab
 
-Accept the terms for the CSR1000v Marketplace offer:
+Accept the terms for the CSR8000v Marketplace offer:
 
-      az vm image terms accept --urn cisco:cisco-csr-1000v:16_12_5-byol:latest
+      az vm image terms accept -p cisco -f cisco-c8000v-byol --plan 17_13_01a-byol -o none
 
 Deploy the Bicep template:
 
@@ -57,7 +57,7 @@ The BGP peering between ARS and the VPN Gateway in the Hub is controlled by the 
 
 ![image](images/rs-b2b.png)
 
-The CSR1000v NVA is up but it must still be configured:
+The CSR8000v NVA is up but it must still be configured:
 
 - Obtain both public IP addresses of Branch1VPNGW in Cloud Shell:
 
@@ -66,10 +66,18 @@ The CSR1000v NVA is up but it must still be configured:
 
 - In below configuration, replace *Branch1VPNGWPubIpV41* and *Branch1VPNGWPubIpV42* with the first and second public IP addresses of Branch1VPNGW.
 
-- Log in to the CSR1000v, preferably via the Serial console in the portal as this does not rely on network connectivity in the VNET. 
+- Log in to the CSR8000v, preferably via the Serial console in the portal as this does not rely on network connectivity in the VNET. 
   - Serial console is under Support + troubleshooting in the Virtual Machine blade.
 
 - Enter Enable mode by typing `en` at the prompt, then enter Configuration mode by typing `conf t`.
+
+      license boot level network-advantage addon dna-advantage
+      do wr mem
+      do reload
+
+- The NVA will now reboot. When rebooting is complete log on again through Serial Console.
+
+- Type `en` and then `conf t`.
 
 - Paste in below configuration, one block at a time:
 
