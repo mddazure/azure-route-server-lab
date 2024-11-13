@@ -69,7 +69,7 @@ The CSR8000v NVA is up but it must still be configured:
 - Log in to the CSR8000v, preferably via the Serial console in the portal as this does not rely on network connectivity in the VNET. 
   - Serial console is under Support + troubleshooting in the Virtual Machine blade.
 
-- Enter Enable mode by typing `en` at the prompt, then enter Configuration mode by typing `conf t`.
+- Enter Enable mode by typing `en` at the prompt, then enter Configuration mode by typing `conf t`. Paste in the below commands:
 
       license boot level network-advantage addon dna-advantage
       do wr mem
