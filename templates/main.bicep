@@ -1,6 +1,6 @@
 param rgName string = 'ars-lab'
 
-param location string = 'westeurope'
+param location string = 'swedencentral'
 
 param branch1v4AddressRange string = '10.1.0.0/16'
 param branch1VMSubnetv4AddressRange string = '10.1.0.0/24'
