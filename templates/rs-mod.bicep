@@ -109,7 +109,7 @@ resource Branch1BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' 
       id: prefixIpV4.id
     }
   }
-}
+}/*
 resource Branch2BastionPubIpV4 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   name: 'Branch2BastionPubIpV4'
   location: location
@@ -166,7 +166,7 @@ resource HubVPNGWPubIpV42 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
       id: prefixIpV4.id
     }
   }
-}
+}*/
 resource Branch1VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   name: 'Branch1VPNGWPubIpV41'
   location: location
@@ -204,7 +204,7 @@ resource Branch1VPNGWPubIpV42 'Microsoft.Network/publicIPAddresses@2020-11-01' =
       id: prefixIpV4.id
     }
   }
-}
+}/*
 resource Branch2VPNGWPubIpV41 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   name: 'Branch2VPNGWPubIpV41'
   location: location
@@ -242,7 +242,7 @@ resource Branch2VPNGWPubIpV42 'Microsoft.Network/publicIPAddresses@2020-11-01' =
       id: prefixIpV4.id
     }
   }
-}
+}*/
 resource RouteServerPubIPV4 'Microsoft.Network/publicIPAddresses@2020-11-01' = {
   name: 'RouteServerPubIPV4'
   location: location
@@ -348,7 +348,7 @@ resource Branch1 'Microsoft.Network/virtualNetworks@2020-11-01' = {
       } 
     ]      
   } 
-}
+}/*
 resource Branch2 'Microsoft.Network/virtualNetworks@2020-11-01' = {
   name: 'Branch2'
   location: location
@@ -383,7 +383,7 @@ resource Branch2 'Microsoft.Network/virtualNetworks@2020-11-01' = {
       } 
     ]      
   } 
-}
+}*/
 resource Spoke1 'Microsoft.Network/virtualNetworks@2020-11-01' = {
   name: 'Spoke1'
   location: location
@@ -500,6 +500,7 @@ resource Branch1Bastion 'Microsoft.Network/bastionHosts@2020-11-01' = {
     ]
   }
 }
+/*
 resource Branch2Bastion 'Microsoft.Network/bastionHosts@2020-11-01' = {
   name: 'Branch2Bastion'
   dependsOn:[
@@ -521,14 +522,14 @@ resource Branch2Bastion 'Microsoft.Network/bastionHosts@2020-11-01' = {
       }
     ]
   }
-}
+}*/
 //PEERINGS
 resource spoke1hub 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2020-08-01' = {
   name: 'spoke1-hub'
   dependsOn:[
     Hub
     Spoke1
-    HubVPNGW
+    //HubVPNGW
   ]
   parent: Spoke1
   properties:{
@@ -545,7 +546,7 @@ resource hubspoke1 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@202
   dependsOn:[
     Hub
     Spoke1
-    HubVPNGW
+    //HubVPNGW
   ]
   parent: Hub
   properties:{
@@ -561,7 +562,7 @@ resource hubspoke1 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@202
 resource RouteServer 'Microsoft.Network/virtualHubs@2021-02-01' = {
   name: 'RouteServer'
   dependsOn: [
-    HubVPNGW
+    //HubVPNGW
     RouteServerPubIPV4
   ]
   location: location
@@ -650,7 +651,7 @@ module Branch1VM 'vm.bicep' = {
     location:location
     subnetId: resourceId('Microsoft.Network/virtualNetworks/subnets','Branch1','VMSubnet')
   }
-}
+}/*
 module Branch2VM 'vm.bicep' = {
   name: 'Branch2VM'
   dependsOn:[
@@ -676,8 +677,9 @@ module Spoke1VM 'vm.bicep' = {
     location:location
     subnetId: resourceId('Microsoft.Network/virtualNetworks/subnets','Spoke1','VMSubnet')
   }
-}
+}*/
 //VPN Gateways
+/*
 resource HubVPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
   name: 'HubVPNGW'
   location: location
@@ -726,7 +728,7 @@ resource HubVPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
       tier: 'VpnGw1AZ'
     }
   }
-}
+}*/
 resource Branch1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
   name: 'Branch1VPNGW'
   location: location
@@ -747,7 +749,7 @@ resource Branch1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
           }
         }
       }
-      {
+      /*{
         name: 'ipconfig2'
         properties: {
           privateIPAllocationMethod: 'Dynamic'
@@ -758,7 +760,7 @@ resource Branch1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
             id: Branch1VPNGWPubIpV42.id
             }
           }
-        }
+        }*/
     ]
     gatewayType: 'Vpn'
     vpnType: 'RouteBased'
@@ -768,7 +770,7 @@ resource Branch1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
       asn: Branch1GWASN
     }
     enablePrivateIpAddress: false
-    activeActive: true
+    activeActive: false
     gatewayDefaultSite: null
     sku:{
       name: 'VpnGw1AZ'
@@ -776,6 +778,7 @@ resource Branch1VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
     }
   }
 }
+/*
 resource Branch2VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
   name: 'Branch2VPNGW'
   location: location
@@ -824,7 +827,7 @@ resource Branch2VPNGW 'Microsoft.Network/virtualNetworkGateways@2021-02-01'= {
       tier: 'VpnGw1AZ'
     }
   }
-}
+}*/
 //Local Network Gateway
 resource lngCSR 'Microsoft.Network/localNetworkGateways@2021-02-01' = {
   name: 'lngCSR'
@@ -846,6 +849,7 @@ resource lngCSR 'Microsoft.Network/localNetworkGateways@2021-02-01' = {
   }
 }
 //Connections
+/*
 resource connectionS2HubGW 'Microsoft.Network/connections@2021-02-01' = {
   name: 'connectionS2HubGW'
   location: location
@@ -887,7 +891,7 @@ resource connectionHubS2GW 'Microsoft.Network/connections@2021-02-01' = {
     enableBgp: true
     sharedKey: tunnelKey
   }
-}
+}*/
 resource connectionS1HubCSR 'Microsoft.Network/connections@2021-02-01' = {
   name: 'connectionS1HubCSR'
   location: location
@@ -907,18 +911,6 @@ resource connectionS1HubCSR 'Microsoft.Network/connections@2021-02-01' = {
     connectionType: 'IPsec'
     sharedKey:tunnelKey
     enableBgp: true
-    ipsecPolicies: [
-      {
-          saLifeTimeSeconds: 27000
-          saDataSizeKilobytes: 0
-          ipsecEncryption: 'GCMAES256'
-          ipsecIntegrity: 'GCMAES256'
-          ikeEncryption: 'AES256'
-          ikeIntegrity: 'SHA384'
-          dhGroup: 'ECP384'
-          pfsGroup: 'None'
-      }
-  ]
   }
 }
 //outputs

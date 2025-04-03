@@ -83,9 +83,9 @@ The CSR8000v NVA is up but it must still be configured:
 
 ```
 crypto ikev2 proposal azure-proposal-connectionS1HubCSR 
- encryption aes-cbc-256 aes-cbc-128
- integrity sha1 sha256
- group 2
+ encryption aes-cbc-256
+ integrity sha384
+ group 20
 !
 crypto ikev2 policy azure-policy-connectionS1HubCSR 
  proposal azure-proposal-connectionS1HubCSR
@@ -108,7 +108,7 @@ crypto ikev2 profile azure-profile-connectionB1HubCSR
  lifetime 28800
  dpd 10 5 on-demand
 !
-crypto ipsec transform-set azure-ipsec-proposal-set esp-aes 256 esp-sha256-hmac 
+crypto ipsec transform-set azure-ipsec-proposal-set esp-gcm 256 
  mode tunnel
 !
 crypto ipsec profile azure-ipsec-b1
@@ -149,14 +149,18 @@ router bgp 64000
  network 10.0.253.0 mask 255.255.255.0
  neighbor 10.0.0.4 remote-as 65515
  neighbor 10.0.0.4 ebgp-multihop 255
+ neighbor 10.0.0.4 soft-reconfiguration inbound 
  neighbor 10.0.0.5 remote-as 65515
  neighbor 10.0.0.5 ebgp-multihop 255
+ neighbor 10.0.0.5 soft-reconfiguration inbound 
  neighbor 10.1.254.4 remote-as 100
  neighbor 10.1.254.4 ebgp-multihop 255
  neighbor 10.1.254.4 update-source Loopback11
+ neighbor 10.1.254.4 soft-reconfiguration inbound
  neighbor 10.1.254.5 remote-as 100
  neighbor 10.1.254.5 ebgp-multihop 255
  neighbor 10.1.254.5 update-source Loopback11
+ neighbor 10.1.254.5 soft-reconfiguration inbound
 
 ```
 - Type `exit` multiple times, until the prompt shows `csr#`.

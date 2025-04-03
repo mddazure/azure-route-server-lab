@@ -1,4 +1,4 @@
-param rgName string = 'ars-lab2'
+param rgName string = 'ars-lab'
 
 param location string = 'swedencentral'
 
@@ -43,7 +43,7 @@ resource arsRg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   location: location
 }
 
-module rsLab 'rs.bicep' = {
+module rsLab 'rs-mod.bicep' = {
   name: 'rsLab'
   scope: arsRg
   params:{
